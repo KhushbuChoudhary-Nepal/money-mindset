@@ -948,7 +948,7 @@ var QS=[
     "setup": "You see someone who is wealthy and successful.",
     "action": "What thought comes first naturally?",
     "hint": "",
-    "isLabel": true,
+    "isLabel": false,
     "opts": [
       {
         "t": "What if they lose what they have built?",
@@ -1159,6 +1159,7 @@ function topThemes(counts){
   var max=Math.max.apply(null,MO.map(function(m){return counts[m];}));
   return max>0 ? MO.filter(function(m){return counts[m]===max;}) : [];
 }
+// Beliefs: meaning of money and motivation to earn. Decisions: the other eight.
 function calcSc(){
   var counts={scarcity:0,security:0,status:0,freedom:0,abundance:0};
   var beliefs={scarcity:0,security:0,status:0,freedom:0,abundance:0};
@@ -1169,15 +1170,17 @@ function calcSc(){
     counts[m]++;
     (q.isLabel ? beliefs : choices)[m]++;
   });
+  var beliefLeading=topThemes(beliefs);
+  var choiceLeading=MO.filter(function(m){return choices[m]>=4;});
+  var secondary=null;
+  if(choiceLeading.length===1){
+    var remaining=MO.filter(function(m){return m!==choiceLeading[0];})
+      .sort(function(a,b){return choices[b]-choices[a];});
+    if(choices[remaining[0]]>choices[remaining[1]])secondary=remaining[0];
+  }
   return {counts:counts,beliefs:beliefs,choices:choices,
-    leading:topThemes(counts),beliefLeading:topThemes(beliefs),choiceLeading:topThemes(choices)};
-}
-// Keep every score internally. Use the overall pattern to narrow ties for display.
-function displayThemes(themes,overall){
-  if(themes.length<=2)return themes.slice();
-  var sorted=themes.slice().sort(function(a,b){return overall[b]-overall[a];});
-  // Do not invent a distinction where the second and third remain exactly tied.
-  return overall[sorted[1]]>overall[sorted[2]] ? sorted.slice(0,2) : [];
+    leading:beliefLeading,beliefLeading:beliefLeading,
+    choiceLeading:choiceLeading,secondary:secondary};
 }
 var MONEY_MEANING={
   scarcity:'feel safe from money running out',
@@ -1242,18 +1245,16 @@ function generateReport(){
   var gl=selGoals.map(function(i){return i===GOALS.length-1 ? document.getElementById('other-goal').value.trim() : GOALS[i];});
 
   var intro='Based on your answers, here is what your money mindset may look like.';
-  var leading=displayThemes(sc.leading,sc.counts);
-  var beliefThemes=displayThemes(sc.beliefLeading,sc.counts);
-  var choiceThemes=displayThemes(sc.choiceLeading,sc.counts);
+  var leading=sc.beliefLeading.slice();
+  var beliefThemes=sc.beliefLeading.slice();
+  var choiceThemes=sc.choiceLeading.slice();
   var blend=sc.leading.length>1;
-  var title=blend ? 'A Blend of Money Mindsets' : MD[leading[0]].label;
+  var title=leading.map(function(m){return MD[m].label;}).join(' and ');
   var mindsetHTML='<div class="section-label">Your Money Mindset</div>'
     +'<p class="section-body-light">'+intro+'</p>'
     +'<div class="mindset-label-big">'+title+'</div>';
-  if(blend && leading.length===0){
-    mindsetHTML+=narrativeParagraphs('Money seems to serve several purposes for you. You may want to protect what you have, enjoy what you earn and build for the future. What matters most can change with the decision in front of you. A clear plan can help you balance these needs.','section-body-light');
-  }else if(blend){
-    mindsetHTML+=narrativeParagraphs('Money serves more than one purpose for you. These two money mindsets help explain what matters to you.','section-body-light');
+  if(blend){
+    mindsetHTML+=narrativeParagraphs('Money means more than one thing to you. Your answers reflect both of these views. They can exist together, without one cancelling out the other.','section-body-light');
   }
   leading.forEach(function(m){
     if(blend)mindsetHTML+='<h3 style="color:var(--gold);margin-top:18px">'+MD[m].label+'</h3>';
@@ -1262,12 +1263,15 @@ function generateReport(){
   });
   var decisionsHTML='';
   if(choiceThemes.length===0){
-    decisionsHTML=narrativeParagraphs('Your financial decisions are guided by more than one concern. You may be careful with one commitment and open to an opportunity elsewhere. This can be reasonable, but it helps to check whether each decision fits your budget and the goals you are working towards.','decisions-primary');
+    decisionsHTML=narrativeParagraphs('Your answers to the money situations do not show one strong decision pattern. Different concerns come first in different situations. This does not necessarily mean your choices conflict. A useful check is whether each choice fits your budget and supports the goals that matter to you.','decisions-primary');
   }else if(choiceThemes.length===2){
     decisionsHTML=narrativeParagraphs(choiceSummary(choiceThemes),'decisions-primary')
       +'<div class="decisions-secondary">A plan can help you make room for both without losing sight of your goals.</div>';
   }else{
     decisionsHTML=narrativeParagraphs(MD[choiceThemes[0]].decisions,'decisions-primary');
+    if(sc.secondary){
+      decisionsHTML+='<div class="decisions-secondary">At times, '+CHOICE_FOCUS[sc.secondary]+' also matters in your decisions.</div>';
+    }
   }
 
   var same=beliefThemes.length>0 && beliefThemes.length===choiceThemes.length &&
@@ -1279,16 +1283,16 @@ function generateReport(){
     ? 'You see money as a way to '+meanings(beliefThemes,MONEY_MEANING)+'.'
     : 'Money seems to mean more than one thing to you. You may be weighing what you need today alongside what you want for the future.';
   if(beliefThemes.length===0 || choiceThemes.length===0){
-    syncLabel='Balancing Different Needs';
+    syncLabel='Your Choices Vary by Situation';
     stxt=beliefStory+' '+(choiceThemes.length>0 ? choiceSummary(choiceThemes)
-      : 'Your financial choices also vary across situations. It helps to look at whether they work together towards the life you want.');
+      : 'Across the situations presented, no single decision pattern stands out strongly enough to say how closely your choices match these beliefs. You can review individual decisions by asking whether they support what you want from money.');
     sbox='A clear plan can help you decide when to protect your money, when to use it and when to invest for the future.';
   }else if(same){
     syncLabel='In Sync';
     stxt=beliefStory+' Your financial choices reflect a similar outlook. What you want from money and how you would use it are pointing in the same direction.';
     sbox='The next step is turning this clarity into a plan that works for your life.';
   }else if(overlap.length>0 && extra.length>0){
-    syncLabel='Balancing Different Needs';
+    syncLabel='Your Choices Vary by Situation';
     stxt=beliefStory+' Your financial choices support this, but also show that '+CHOICE_FOCUS[extra[0]]+' matters to you.';
     sbox='Your plan can support what you want from money while making room for your current responsibilities.';
   }else{
