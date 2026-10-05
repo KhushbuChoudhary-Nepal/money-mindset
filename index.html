@@ -11,7 +11,16 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Know Your Money Mindset — by Khushbu Choudhary">
 <meta name="twitter:description" content="Know what you truly believe about money and whether your financial decisions are in sync. 10 questions. Under 5 minutes. Free report.">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+<script>
+// External resources download without blocking the opening page.
+var resolveReportFontStyles, resolvePDFLibrary;
+var reportFontStylesReady=new Promise(function(resolve){resolveReportFontStyles=resolve;});
+var pdfLibraryReady=new Promise(function(resolve){resolvePDFLibrary=resolve;});
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';resolveReportFontStyles(true)" onerror="resolveReportFontStyles(false)">
+<noscript>Enable JavaScript to complete the assessment and save your report.</noscript>
 <style>
 :root {
   --green-dark: #0D2B1F;
@@ -531,6 +540,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
 #save-pdf-btn { padding: 14px 28px; border: none; border-radius: 10px; background: #0D2B1F; color: white; font: 600 16px 'DM Sans', sans-serif; cursor: pointer; }
 #save-pdf-btn:disabled { opacity: .65; cursor: wait; }
 #pdf-status { font: 14px 'DM Sans', sans-serif; color: #4A4A5A; margin-top: 8px; }
+.about-section #pdf-status { color: rgba(255,255,255,0.8); }
 .pdf-export .report-actions, .pdf-export .btn-share-friend { display: none !important; }
 .pdf-export .fade-in { animation: none !important; opacity: 1 !important; transform: none !important; }
 .pdf-export .report-section, .pdf-export .about-section, .pdf-export .disclaimer { break-inside: avoid; }
@@ -555,7 +565,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
   .cta-btns a { box-sizing: border-box; width: 100%; min-width: 0; }
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" onload="resolvePDFLibrary(true)" onerror="resolvePDFLibrary(false)"></script>
 </head>
 <body>
 
@@ -1317,8 +1327,7 @@ function generateReport(){
 
   var out = document.getElementById('report-out');
   out.innerHTML =
-    '<div class="report-actions"><button type="button" id="save-pdf-btn" onclick="saveReportPDF()">Save PDF</button><p id="pdf-status" role="status" aria-live="polite"></p></div>'
-    +'<div class="report-header fade-in">'
+    '<div class="report-header fade-in">'
     +'<div class="report-hi">Hi '+fn+', here is</div>'
     +'<h1 class="report-title">Your Money Mindset Report</h1>'
     +'<div class="report-divider"></div>'
@@ -1369,6 +1378,7 @@ function generateReport(){
     +'<div class="about-photo" id="aphoto"></div>'
     +'</div>'
     +'<div class="decisions-secondary" style="font-style:italic;margin-bottom:18px">Understanding your money mindset is the first step. The real change happens when you take action. If this report got you thinking — let us talk.</div>'
+    +'<div class="report-actions"><button type="button" id="save-pdf-btn" onclick="saveReportPDF()">Save PDF</button><p id="pdf-status" role="status" aria-live="polite"></p></div>'
     +'<div class="cta-btns">'
     +'<a href="https://www.linkedin.com/in/khushbukeyal" target="_blank" rel="noopener noreferrer" class="btn-cta-call btn-linkedin"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg> Connect on LinkedIn</a>'
     +'<a href="https://wa.me/9779849849876" target="_blank" rel="noopener noreferrer" class="btn-cta-wa">'+waIcon+' Message on WhatsApp</a>'
@@ -1393,21 +1403,31 @@ img.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgICAgMCAg
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
 }
+function waitForReportResource(promise,timeout){
+  return new Promise(function(resolve){
+    var timer=setTimeout(function(){resolve(false);},timeout);
+    Promise.resolve(promise).then(function(value){clearTimeout(timer);resolve(value);},function(){clearTimeout(timer);resolve(false);});
+  });
+}
 async function saveReportPDF() {
   var button = document.getElementById('save-pdf-btn');
   var status = document.getElementById('pdf-status');
   if (button.disabled) return;
+  button.disabled=true;
+  button.textContent='Preparing PDF…';
+  status.textContent='';
+  await waitForReportResource(pdfLibraryReady,20000);
   if (typeof html2pdf !== 'function') {
+    button.disabled=false;
+    button.textContent='Save PDF';
     status.textContent = 'Choose Save as PDF in the print window.';
     window.print();
     return;
   }
-  button.disabled = true;
-  button.textContent = 'Preparing PDF…';
-  status.textContent = '';
   var wrapper;
   try {
-    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await waitForReportResource(reportFontStylesReady,15000);
+    if (document.fonts && document.fonts.ready) await waitForReportResource(document.fonts.ready,15000);
     var source = document.getElementById('report-out');
     await Promise.all(Array.from(source.querySelectorAll('img')).map(function(img) {
       return img.decode ? img.decode().catch(function(){}) : Promise.resolve();
