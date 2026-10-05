@@ -537,9 +537,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
 .btn-cta-call.btn-linkedin { background: #0A66C2 !important; }
 .btn-cta-call.btn-linkedin:hover { background: #004182 !important; }
 .report-actions { text-align: center; margin: 0 0 24px; }
-#save-pdf-btn { padding: 14px 28px; border: none; border-radius: 10px; background: #C0392B; color: white; font: 600 16px 'DM Sans', sans-serif; cursor: pointer; }
+#save-pdf-btn { width: 100%; box-sizing: border-box; padding: 14px 28px; border: none; border-radius: 10px; background: #C0392B; color: white; font: 600 16px 'DM Sans', sans-serif; cursor: pointer; }
 #save-pdf-btn:hover { background: #A93226; }
 #save-pdf-btn:disabled { opacity: .65; cursor: wait; }
+#pdf-status:empty { display: none; }
 #pdf-status { font: 14px 'DM Sans', sans-serif; color: #4A4A5A; margin-top: 8px; }
 .about-section #pdf-status { color: rgba(255,255,255,0.8); }
 .pdf-export .report-actions, .pdf-export .btn-share-friend { display: none !important; }
@@ -1105,7 +1106,22 @@ function submitForm(){
   document.getElementById('t-name').textContent=name.split(' ')[0];
   showScreen('screen-transition');
 }
-function startQuestions(){curQ=0;showScreen('screen-questions');renderQ();}
+// Display order is shuffled once per page session; answers retain original option indices.
+var optionOrders=null;
+function getOptionOrders(){
+  if(!optionOrders){
+    optionOrders=QS.map(function(q){
+      var order=q.opts.map(function(opt,i){return i;});
+      for(var i=order.length-1;i>0;i--){
+        var j=Math.floor(Math.random()*(i+1));
+        var temp=order[i];order[i]=order[j];order[j]=temp;
+      }
+      return order;
+    });
+  }
+  return optionOrders;
+}
+function startQuestions(){getOptionOrders();curQ=0;showScreen('screen-questions');renderQ();}
 function renderQ(){
   var q=QS[curQ];var L=['A','B','C','D','E'];
   document.getElementById('q-num').textContent='Question '+String(curQ+1).padStart(2,'0');
@@ -1115,11 +1131,13 @@ function renderQ(){
   document.getElementById('q-count').textContent=(curQ+1)+' of 10';
   document.getElementById('q-fill').style.width=(((curQ+1)/10)*100)+'%';
   var opts=document.getElementById('q-opts');opts.innerHTML='';
-  q.opts.forEach(function(opt,i){
+  getOptionOrders()[curQ].forEach(function(originalIndex,i){
+    var opt=q.opts[originalIndex];
     var btn=document.createElement('button');
-    btn.className='option-btn'+(answers[curQ]===i?' selected':'');
+    btn.className='option-btn'+(answers[curQ]===originalIndex?' selected':'');
+    btn.dataset.optionIndex=String(originalIndex);
     btn.innerHTML='<span class="option-letter">'+L[i]+'</span><span class="option-text">'+opt.t+'</span>';
-    btn.onclick=(function(idx){return function(){selAns(idx);};})(i);
+    btn.onclick=(function(idx){return function(){selAns(idx);};})(originalIndex);
     opts.appendChild(btn);
   });
   var nb=document.getElementById('q-next');nb.disabled=answers[curQ]===null;nb.textContent=curQ===9?'Continue':'Next';
@@ -1128,7 +1146,7 @@ function renderQ(){
 }
 function selAns(idx){
   answers[curQ]=idx;
-  document.querySelectorAll('.option-btn').forEach(function(b,i){b.classList.toggle('selected',i===idx);});
+  document.querySelectorAll('.option-btn').forEach(function(b){b.classList.toggle('selected',Number(b.dataset.optionIndex)===idx);});
   document.getElementById('q-next').disabled=false;
   // Clear any previous pending advance
   if(window._advTimer) clearTimeout(window._advTimer);
@@ -1453,7 +1471,7 @@ async function saveReportPDF() {
       jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'},
       pagebreak: {mode: ['css','legacy'], avoid: ['.report-section:not(.report-section-hero)','.about-section','.disclaimer','p','.decisions-secondary']}
     }).from(clone).save();
-    status.textContent = 'PDF ready. Check your downloads or your browser’s save options.';
+    status.textContent = '';
   } catch (error) {
     status.textContent = 'Choose Save as PDF in the print window.';
     window.print();
