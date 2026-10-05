@@ -1007,45 +1007,45 @@ var MD={
   "scarcity": {
     "label": "The Survivor",
     "theme": "protecting money from loss",
-    "desc": "For you, money often brings a question: “What if I need it later?” You may have enough for a short holiday, but feel better keeping the money in your bank account. A course may help your career, but you wonder, “What if I pay and get nothing from it?” Being careful can help you protect your money. But worry may sometimes stop you from enjoying something you can afford or trying something that could help you.",
-    "descBox": "A plan for everyday needs and emergencies can help you feel safer using some money for yourself and your future.",
-    "decisions": "Before spending or investing, the possible loss may be the first thing on your mind. For example, even a useful course can feel uncomfortable when the benefit is uncertain. Having money set aside may matter more to you than taking the opportunity.",
+    "desc": "Money can feel hard to earn and easy to lose. The thought of losing it, spending too much or taking a risk makes you uneasy. There is often a quiet worry—what if it is not enough? You want to know you will be able to manage, even if things go wrong.",
+    "descBox": "For you, money often comes with the question: “Will I have enough?”",
+    "decisions": "When it comes to money, your first concern is often avoiding loss. You think twice before spending, and taking a risk or committing a large amount may feel uncomfortable. Deep down, there is one question—what if things go wrong? This worry can shape a decision even when you have not yet made a plan for managing it.",
     "strength": "You may notice costs and possible losses before committing your money.",
     "blind": "Worry may sometimes lead you to delay a useful opportunity, even when it fits your budget."
   },
   "security": {
     "label": "The Planner",
     "theme": "security and preparation",
-    "desc": "For you, money may bring peace of mind when you know what it is meant for. Before booking a holiday, you might check that bills, savings and family needs are covered. Before joining a course, you may want to know how it will support your work or income. A plan can help you make these decisions with confidence. Sometimes, though, waiting for everything to feel certain may make it harder to try something new.",
-    "descBox": "A secure foundation can give you room to enjoy today and explore tomorrow.",
-    "decisions": "You may first ask whether a choice fits your plan and keeps your family secure. A salary increase might go towards savings or insurance before a lifestyle upgrade. You may feel more comfortable investing after checking the details.",
+    "desc": "You see money as a way to build a stable and secure life—and you take that seriously. Before spending, investing or making a financial commitment, you prefer to think it through. You want to know that the decision fits your budget and protects your family’s needs. For you, peace of mind matters.",
+    "descBox": "You want a life that feels secure and prepared for the future.",
+    "decisions": "Your financial decisions are guided by stability. Before committing money, you prefer to research, plan and check that it fits your budget. You want to make sure your needs are covered before taking on something new. Peace of mind matters more to you than a quick gain.",
     "strength": "You may plan ahead and keep everyday needs and future responsibilities in view.",
     "blind": "Waiting for complete certainty may sometimes delay a worthwhile choice."
   },
   "status": {
     "label": "The Achiever",
     "theme": "success and recognition",
-    "desc": "For you, money may be a way to see how far you have come. A better home, a special holiday or a qualification that helps you stand out can feel like a reward for your work. Recognition may encourage you to aim higher. Sometimes, though, what looks successful to others can become more important than what works for your own life.",
-    "descBox": "Enjoy your achievements while keeping room for the goals that matter to you.",
-    "decisions": "You may notice how a choice reflects your progress. After a salary increase, a better phone or a holiday might feel like a well-earned reward. A course or event may appeal because it could help you stand out professionally.",
+    "desc": "You see money as a reflection of your hard work and achievement. You want to build a successful life and be recognised for how far you have come. A better home, a qualification or an upgrade in your lifestyle can feel like a visible reward for your effort. For you, money can help you make your mark.",
+    "descBox": "Success and recognition are an important part of what money means to you.",
+    "decisions": "Your financial choices often reflect achievement and recognition. You are drawn to things that show your progress and opportunities that help you stand out. A better home or a lifestyle upgrade may feel like a reward for your work. For you, money can be a statement of how far you have come.",
     "strength": "Your wish to achieve may encourage you to work towards meaningful milestones.",
     "blind": "Comparison with others may sometimes influence spending more than your own priorities."
   },
   "freedom": {
     "label": "The Free Spirit",
     "theme": "independence and choice",
-    "desc": "For you, money may mean being able to choose how you live and work. You might prefer renting if it lets you move easily, or consider a course because it opens options beyond your current job. Building income beyond a salary may appeal because it could give you more control over your time. Freedom still needs a foundation: savings and a clear plan can make those choices easier to sustain.",
-    "descBox": "Build the financial support that helps your freedom last.",
-    "decisions": "You may ask whether a choice gives you more flexibility. A course could mean new ways to work, while extra income could reduce dependence on one job. You may be less interested in owning something if it ties up money or limits your choices.",
+    "desc": "You see money as a way to have choices—and that matters deeply to you. You want room to choose how you work, where you live and how you spend your time. Depending on one job or one income may feel limiting. For you, one of the best things money can offer is freedom to live on your own terms.",
+    "descBox": "You want money to give you more control over your life.",
+    "decisions": "Your financial choices are guided by freedom. You are drawn to learning, connections and income opportunities that could give you options beyond your current job. Flexibility may matter more than owning something that ties you down. The goal is to have more control over how you live and work.",
     "strength": "You may see ways to use money to create more options for your life.",
     "blind": "A wish to stay flexible may sometimes make regular saving or long-term commitments easy to postpone."
   },
   "abundance": {
     "label": "The Visionary",
     "theme": "growth and lasting impact",
-    "desc": "For you, money may feel like something you can build into more possibilities over time. You might see a course as a way to grow your earning potential, or a useful connection as the start of a business idea. A salary increase may make you think about investing more. Looking ahead can help you build for the future, but a promising idea still needs careful checks and a place in your budget.",
-    "descBox": "Give your bigger goals a plan, and check the risks before committing money.",
-    "decisions": "You may first notice what an opportunity could grow into. A course could increase your future earnings, and extra salary could add to your investments. Before a major purchase, you may think about how much money will remain for future growth.",
+    "desc": "You see money as a tool to create wealth and lasting impact. You look at what an opportunity could grow into over time. A course, a business idea or an investment may appeal because it could help you build something bigger. For you, money is a resource to grow towards your future goals.",
+    "descBox": "Your outlook centres on growth and what you can build over time.",
+    "decisions": "Your financial choices are guided by growth. You see opportunities to increase your earnings, grow your assets and build wealth beyond your salary. A useful course or business connection may feel like an investment in your future. Before a major purchase, you may think about what will remain available for further growth.",
     "strength": "You may connect today’s opportunities with what you want to build over time.",
     "blind": "Excitement about future growth may sometimes make costs, uncertainty or possible losses easier to overlook."
   }
@@ -1158,16 +1158,26 @@ function displayThemes(themes,overall){
   // Do not invent a distinction where the second and third remain exactly tied.
   return overall[sorted[1]]>overall[sorted[2]] ? sorted.slice(0,2) : [];
 }
-function answerExample(themes,belief){
-  var contexts=['what money means to you','an expensive purchase','a risky investment',
-    'why you earn money','a salary increase','a paid networking event','buying a home',
-    'a career course','someone wealthy','a major purchase'];
-  var index=QS.findIndex(function(q,i){
-    return q.isLabel===belief && q.opts[answers[i]] &&
-      (themes.length===0 || themes.indexOf(q.opts[answers[i]].m)>-1);
-  });
-  if(index<0)return '';
-  return 'When asked about '+contexts[index]+', you chose: “'+escapeHTML(QS[index].opts[answers[index]].t)+'”';
+var MONEY_MEANING={
+  scarcity:'feel safe from money running out',
+  security:'build a stable life for yourself and your family',
+  status:'show your success and how far you have come',
+  freedom:'choose how you live and work',
+  abundance:'build wealth and create more possibilities for the future'
+};
+var CHOICE_FOCUS={
+  scarcity:'protecting what you have and avoiding possible losses',
+  security:'planning ahead and keeping your finances secure',
+  status:'rewarding your progress and reflecting your success',
+  freedom:'creating more flexibility and reducing dependence on one job',
+  abundance:'growing your money and building for the future'
+};
+function meanings(styles,map){
+  return styles.map(function(m){return map[m];}).join(', while also wanting to ');
+}
+function choiceSummary(styles){
+  if(styles.length===1)return 'Your financial choices lean towards '+CHOICE_FOCUS[styles[0]]+'.';
+  return 'In some decisions, you focus on '+CHOICE_FOCUS[styles[0]]+'. In others, '+CHOICE_FOCUS[styles[1]]+' matters too.';
 }
 function themeNames(themes){
   var names={scarcity:'protecting your money',security:'security',status:'recognition',freedom:'freedom',abundance:'growth'};
@@ -1193,11 +1203,9 @@ function generateReport(){
     +'<p class="section-body-light">'+intro+'</p>'
     +'<div class="mindset-label-big">'+title+'</div>';
   if(blend && leading.length===0){
-    mindsetHTML+=narrativeParagraphs('Your answers reflect a mix of money priorities, without one or two standing out clearly. You may think differently about spending, security and future opportunities. Start by looking at what matters most for your life right now.','section-body-light');
+    mindsetHTML+=narrativeParagraphs('Money seems to serve several purposes for you. You may want to protect what you have, enjoy what you earn and build for the future. What matters most can change with the decision in front of you. A clear plan can help you balance these needs.','section-body-light');
   }else if(blend){
-    mindsetHTML+=narrativeParagraphs('Your answers give equal weight to '+themeNames(leading)+'. Several priorities can matter at the same time; you do not have to fit into one style.','section-body-light');
-  }else{
-    mindsetHTML+=narrativeParagraphs('The theme you chose most often was '+themeNames(leading)+'. Other priorities may also matter to you.','section-body-light');
+    mindsetHTML+=narrativeParagraphs('Money serves more than one purpose for you. These two money mindsets help explain what matters to you.','section-body-light');
   }
   leading.forEach(function(m){
     if(blend)mindsetHTML+='<h3 style="color:var(--gold);margin-top:18px">'+MD[m].label+'</h3>';
@@ -1206,12 +1214,10 @@ function generateReport(){
   });
   var decisionsHTML='';
   if(choiceThemes.length===0){
-    decisionsHTML=narrativeParagraphs('Your choices change with the situation, without one or two priorities standing out clearly. '+answerExample([],false),'decisions-primary');
+    decisionsHTML=narrativeParagraphs('Your financial decisions are guided by more than one concern. You may be careful with one commitment and open to an opportunity elsewhere. This can be reasonable, but it helps to check whether each decision fits your budget and the goals you are working towards.','decisions-primary');
   }else if(choiceThemes.length===2){
-    decisionsHTML=narrativeParagraphs('Your choices point to two priorities: '+themeNames(choiceThemes)+'.','decisions-primary');
-    choiceThemes.forEach(function(m){
-      decisionsHTML+=narrativeParagraphs(answerExample([m],false),'decisions-primary');
-    });
+    decisionsHTML=narrativeParagraphs(choiceSummary(choiceThemes),'decisions-primary')
+      +'<div class="decisions-secondary">A plan can help you make room for both without losing sight of your goals.</div>';
   }else{
     decisionsHTML=narrativeParagraphs(MD[choiceThemes[0]].decisions,'decisions-primary');
   }
@@ -1221,22 +1227,26 @@ function generateReport(){
   var overlap=beliefThemes.filter(function(m){return choiceThemes.indexOf(m)>-1;});
   var extra=choiceThemes.filter(function(m){return beliefThemes.indexOf(m)===-1;});
   var syncLabel,stxt,sbox;
+  var beliefStory=beliefThemes.length>0
+    ? 'You see money as a way to '+meanings(beliefThemes,MONEY_MEANING)+'.'
+    : 'Money seems to mean more than one thing to you. You may be weighing what you need today alongside what you want for the future.';
   if(beliefThemes.length===0 || choiceThemes.length===0){
-    syncLabel='A Mixed Pattern';
-    stxt='Your answers do not point to just one or two priorities across these questions. '+answerExample(beliefThemes,true)+' '+answerExample(choiceThemes,false);
-    sbox='Look at these choices alongside your goals to decide what needs attention now.';
+    syncLabel='Balancing Different Needs';
+    stxt=beliefStory+' '+(choiceThemes.length>0 ? choiceSummary(choiceThemes)
+      : 'Your financial choices also vary across situations. It helps to look at whether they work together towards the life you want.');
+    sbox='A clear plan can help you decide when to protect your money, when to use it and when to invest for the future.';
   }else if(same){
     syncLabel='In Sync';
-    stxt='What you want from money and the choices you selected both point towards '+themeNames(beliefThemes)+'. '+answerExample(beliefThemes,true)+' '+answerExample(choiceThemes,false);
+    stxt=beliefStory+' Your financial choices reflect a similar outlook. What you want from money and how you would use it are pointing in the same direction.';
     sbox='The next step is turning this clarity into a plan that works for your life.';
   }else if(overlap.length>0 && extra.length>0){
-    syncLabel='An Additional Priority';
-    stxt='Your view of money centres on '+themeNames(beliefThemes)+'. Your choices reflect this, while also giving importance to '+themeNames(extra)+'. '+answerExample(extra,false);
-    sbox='This does not mean your thoughts and choices conflict. Your plan can make room for both.';
+    syncLabel='Balancing Different Needs';
+    stxt=beliefStory+' Your financial choices support this, but also show that '+CHOICE_FOCUS[extra[0]]+' matters to you.';
+    sbox='Your plan can support what you want from money while making room for your current responsibilities.';
   }else{
     syncLabel='Different Priorities';
-    stxt='What you want from money points towards '+themeNames(beliefThemes)+'. In the situations we asked about, your choices point towards '+themeNames(choiceThemes)+'. '+answerExample(beliefThemes,true)+' '+answerExample(choiceThemes,false);
-    sbox='Consider whether these choices fit your current needs and longer-term goals. A difference alone does not mean something is wrong.';
+    stxt=beliefStory+' '+choiceSummary(choiceThemes)+' What you want from money and what you put first in a decision may differ. It is worth checking whether that difference supports your current needs or delays a goal you care about.';
+    sbox='A clear plan can help your everyday choices support the life you want to build.';
   }
   var thoughtsHTML='<div class="sync-badge '+(same?'in-sync':'gap')+'">'+syncLabel+'</div>'
     +narrativeParagraphs(stxt,'section-body')
@@ -1350,19 +1360,19 @@ async function saveReportPDF() {
       return img.decode ? img.decode().catch(function(){}) : Promise.resolve();
     }));
     wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:absolute;left:0;top:0;width:794px;z-index:-1;pointer-events:none;background:#F5F0E8;';
+    wrapper.style.cssText = 'position:absolute;left:0;top:0;width:733px;z-index:-1;pointer-events:none;background:#F5F0E8;';
     var clone = source.cloneNode(true);
     clone.removeAttribute('id');
     clone.classList.add('pdf-export');
     clone.querySelectorAll('[id]').forEach(function(el){ el.removeAttribute('id'); });
-    clone.style.cssText = 'width:794px;max-width:none;box-sizing:border-box;padding:24px;background:#F5F0E8;';
+    clone.style.cssText = 'width:100%;max-width:none;margin:0;box-sizing:border-box;padding:24px;background:#F5F0E8;';
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
     var filename = (user.name || 'Your').replace(/[^a-zA-Z0-9_-]+/g,'_') + '_Money_Mindset_Report.pdf';
     await html2pdf().set({
       margin: [8,8,8,8], filename: filename,
       image: {type: 'jpeg', quality: .96},
-      html2canvas: {scale: 1.5, useCORS: true, scrollY: 0, windowWidth: 794},
+      html2canvas: {scale: 1.5, useCORS: true, scrollX: 0, scrollY: 0},
       jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'},
       pagebreak: {mode: ['css','legacy'], avoid: ['.report-section:not(.report-section-hero)','.about-section','.disclaimer','p','.decisions-secondary']}
     }).from(clone).save();
