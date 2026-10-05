@@ -537,7 +537,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
 .btn-cta-call.btn-linkedin { background: #0A66C2 !important; }
 .btn-cta-call.btn-linkedin:hover { background: #004182 !important; }
 .report-actions { text-align: center; margin: 0 0 24px; }
-#save-pdf-btn { padding: 14px 28px; border: none; border-radius: 10px; background: #0D2B1F; color: white; font: 600 16px 'DM Sans', sans-serif; cursor: pointer; }
+#save-pdf-btn { padding: 14px 28px; border: none; border-radius: 10px; background: #C0392B; color: white; font: 600 16px 'DM Sans', sans-serif; cursor: pointer; }
+#save-pdf-btn:hover { background: #A93226; }
 #save-pdf-btn:disabled { opacity: .65; cursor: wait; }
 #pdf-status { font: 14px 'DM Sans', sans-serif; color: #4A4A5A; margin-top: 8px; }
 .about-section #pdf-status { color: rgba(255,255,255,0.8); }
@@ -1259,18 +1260,21 @@ function generateReport(){
   var beliefThemes=sc.beliefLeading.slice();
   var choiceThemes=sc.choiceLeading.slice();
   var blend=sc.leading.length>1;
-  var title=leading.map(function(m){return MD[m].label;}).join(' and ');
+  var title=blend ? 'The Seeker' : MD[leading[0]].label;
   var mindsetHTML='<div class="section-label">Your Money Mindset</div>'
     +'<p class="section-body-light">'+intro+'</p>'
     +'<div class="mindset-label-big">'+title+'</div>';
   if(blend){
-    mindsetHTML+=narrativeParagraphs('Money means more than one thing to you. Your answers reflect both of these views. They can exist together, without one cancelling out the other.','section-body-light');
-  }
-  leading.forEach(function(m){
-    if(blend)mindsetHTML+='<h3 style="color:var(--gold);margin-top:18px">'+MD[m].label+'</h3>';
+    var meaningStyle=QS[0].opts[answers[0]].m;
+    var motivationStyle=QS[3].opts[answers[3]].m;
+    var story='Money means more than one thing to you. You see it as a way to '+MONEY_MEANING[meaningStyle]+', while your motivation to earn also reflects a wish to '+MONEY_MEANING[motivationStyle]+'.';
+    story+=' Both can matter to you at the same time. The useful next step is deciding what matters most for each goal, so your money choices support it.';
+    mindsetHTML+=narrativeParagraphs(story,'section-body-light');
+  }else{
+    var m=leading[0];
     mindsetHTML+=narrativeParagraphs(MD[m].desc,'section-body-light')
       +'<div class="decisions-secondary" style="font-style:italic">'+MD[m].descBox+'</div>';
-  });
+  }
   var decisionsHTML='';
   if(choiceThemes.length===0){
     decisionsHTML=narrativeParagraphs('Your answers to the money situations do not show one strong decision pattern. Different concerns come first in different situations. This does not necessarily mean your choices conflict. A useful check is whether each choice fits your budget and supports the goals that matter to you.','decisions-primary');
@@ -1313,13 +1317,13 @@ function generateReport(){
   var thoughtsHTML='<div class="sync-badge '+(same?'in-sync':'gap')+'">'+syncLabel+'</div>'
     +narrativeParagraphs(stxt,'section-body')
     +'<div class="decisions-secondary" style="font-style:italic">'+sbox+'</div>';
-  var strengthsHTML=leading.map(function(m){
+  var strengthsHTML=(blend ? [] : leading).map(function(m){
     return (blend?'<h3 style="margin-top:16px">'+MD[m].label+'</h3>':'')
       +'<p class="section-body">'+HELP_ICON+'<strong>What may help you:</strong> '+MD[m].strength+'</p>'
       +'<p class="section-body">'+WATCH_ICON+'<strong>What to watch for:</strong> '+MD[m].blind+'</p>';
   }).join('');
-  if(!leading.length){
-    strengthsHTML=narrativeParagraphs(HELP_ICON+'<strong>What may help you:</strong> You may see more than one side of a money decision.','section-body')
+  if(blend){
+    strengthsHTML=narrativeParagraphs(HELP_ICON+'<strong>What may help you:</strong> Ask yourself what you want your money to do for you before making a decision. This can help when more than one need matters.','section-body')
       +narrativeParagraphs(WATCH_ICON+'<strong>What to watch for:</strong> Check whether your spending and saving choices work together towards your goals.','section-body');
   }
 
