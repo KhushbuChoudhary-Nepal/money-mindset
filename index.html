@@ -534,6 +534,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
 .pdf-export .report-actions, .pdf-export .btn-share-friend { display: none !important; }
 .pdf-export .fade-in { animation: none !important; opacity: 1 !important; transform: none !important; }
 .pdf-export .report-section, .pdf-export .about-section, .pdf-export .disclaimer { break-inside: avoid; }
+.pdf-export .report-section-hero { break-inside: auto !important; }
+.pdf-export p, .pdf-export .decisions-secondary { break-inside: avoid; }
+.pdf-export h3 { break-after: avoid; }
+@media print {
+  .report-section-hero { break-inside: auto !important; page-break-inside: auto !important; }
+  .report-section p, .report-section .decisions-secondary { break-inside: avoid; }
+  .report-section h3 { break-after: avoid; }
+}
 @media print { .report-actions, .btn-share-friend { display: none !important; } .fade-in { animation: none !important; opacity: 1 !important; transform: none !important; } }
 
 @media screen and (max-width: 640px) {
@@ -650,7 +658,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
     <p class="transition-desc">
       You will be asked <strong style="color:var(--gold)">10 simple questions</strong> to understand your relationship with money.<br><br>
       It takes less than <strong style="color:var(--gold)">5 minutes</strong> &mdash; and there are no right or wrong answers.<br><br>
-      Just go with your <strong style="color:var(--gold)">first instinct</strong> &mdash; that is where the truth is.
+      Choose the answer <strong style="color:var(--gold)">closest to how you think right now</strong>. More than one may feel familiar.
     </p>
     <div class="transition-pills">
       <div class="pill"><strong>10</strong> Questions</div>
@@ -690,9 +698,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
   <div class="goals-card fade-in">
     <div class="goals-eyebrow">Almost There</div>
     <h2 class="goals-title">Your <em>Financial Goals</em></h2>
-    <p class="goals-desc">Select your top 3 financial goals. This helps us personalise your report.</p>
+    <p class="goals-desc">Which goals matter most to you right now? Choose up to three.</p>
     <div class="goals-counter">Selected: <span id="g-count">0</span> / 3</div>
     <div class="goals-grid" id="g-list"></div>
+    <div class="field-group" id="other-goal-wrap" hidden>
+      <label class="field-label" for="other-goal">Write your goal</label>
+      <input type="text" class="field-input" id="other-goal" placeholder="Your personal goal" maxlength="250" oninput="updGC()">
+    </div>
     <div class="nav-row">
       <button class="btn-back" onclick="goBackToQ()">Back</button>
       <button class="btn-submit-goals" id="g-submit" onclick="generateReport()" disabled>See My Report &rarr;</button>
@@ -708,149 +720,334 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
 <script>
 var MO=['scarcity','security','status','freedom','abundance'];
 var QS=[
-  {setup:"What do you honestly think about money?",action:"",hint:"",isLabel:true,opts:[
-    {t:"Earning money is hard - you really have to struggle for it.",m:"scarcity"},
-    {t:"Money gives you a stable, tension-free life.",m:"security"},
-    {t:"The more money you have, the more people take you seriously.",m:"status"},
-    {t:"Money gives you the freedom to live life on your own terms.",m:"freedom"},
-    {t:"Money has no limits - the more you grow it, the bigger the impact you can make.",m:"abundance"}
-  ]},
-  {setup:"When you see something expensive - say a luxury watch or spending a weekend in a 5 star property.",action:"What thought comes first naturally?",hint:"",isLabel:false,opts:[
-    {t:"I should not waste money on this right now.",m:"scarcity"},
-    {t:"Price is not a barrier - if I want it, I will get it.",m:"abundance"},
-    {t:"Maybe later - right now my family's security comes first.",m:"security"},
-    {t:"I have worked hard for this - why not enjoy the good things in life.",m:"status"},
-    {t:"I buy what I feel like - no guilt, no overthinking.",m:"freedom"}
-  ]},
-  {setup:"You come across a course or workshop that could add real value to your career - it costs around 40 to 50K for a 2 week program.",action:"What is your first thought?",hint:"",isLabel:false,opts:[
-    {t:"This could completely change where I am headed - worth the investment.",m:"abundance"},
-    {t:"Will this actually guarantee a better job or salary?",m:"security"},
-    {t:"This will look great on my profile and make me stand out.",m:"status"},
-    {t:"Let me find a free or cheaper version of this somewhere.",m:"scarcity"},
-    {t:"This could open up options beyond my current job.",m:"freedom"}
-  ]},
-  {setup:"What truly motivates you to earn money?",action:"",hint:"From a monetary perspective, not career aspirations.",isLabel:true,opts:[
-    {t:"I work to build a successful life and stand high in society.",m:"status"},
-    {t:"I work so I never have to struggle or depend on anyone financially.",m:"scarcity"},
-    {t:"I work to create a life where money works for me, not the other way around.",m:"abundance"},
-    {t:"I work to build a stable and secure financial life for myself and my family.",m:"security"},
-    {t:"I work so that one day I have the freedom to live completely on my own terms.",m:"freedom"}
-  ]},
-  {setup:"Your close friend has been diagnosed with a critical illness and needs financial help.",action:"Will you help? (assuming you can)",hint:"",isLabel:false,opts:[
-    {t:"Yes, without thinking twice - health comes first.",m:"abundance"},
-    {t:"I want to help but I worry about my own emergencies.",m:"scarcity"},
-    {t:"Yes - successful people should help others, no second thoughts.",m:"status"},
-    {t:"Yes - as long as my own family finances are not affected.",m:"security"},
-    {t:"Yes - and I will also help them find support from other places.",m:"freedom"}
-  ]},
-  {setup:"Someone you trust recommends an investment - high returns but comes with risk.",action:"What is your first thought?",hint:"",isLabel:false,opts:[
-    {t:"Such opportunities can create real wealth in the long run.",m:"abundance"},
-    {t:"This is how the rich get richer.",m:"status"},
-    {t:"What if I lose the money?",m:"scarcity"},
-    {t:"This could free me from depending on just one income.",m:"freedom"},
-    {t:"Let me research this properly before I invest.",m:"security"}
-  ]},
-  {setup:"You hear about an exclusive event - top professionals and industry leaders will be there.",action:"But it is a paid event. What is your first thought?",hint:"",isLabel:false,opts:[
-    {t:"People who become successful usually attend such events.",m:"status"},
-    {t:"I would rather connect over LinkedIn than spend on this.",m:"scarcity"},
-    {t:"One right conversation here could change everything.",m:"abundance"},
-    {t:"This could be helpful - but is it really worth the fee?",m:"security"},
-    {t:"The right connections here could open doors beyond my current job.",m:"freedom"}
-  ]},
-  {setup:"Imagine you got a 40% salary hike.",action:"What would you most likely do first?",hint:"",isLabel:false,opts:[
-    {t:"Upgrade my lifestyle - new phone, a better car, or that dream vacation.",m:"status"},
-    {t:"Make big investments and grow my asset portfolio.",m:"abundance"},
-    {t:"Keep it safe - you never know when things go wrong.",m:"scarcity"},
-    {t:"Clear my loans and start building income beyond my job.",m:"freedom"},
-    {t:"Invest in proper protection - savings and insurance give me peace of mind.",m:"security"}
-  ]},
-  {setup:"You want to buy a home. Option A is a little out of your budget. Option B is beyond your budget - but it is a good deal.",action:"What would you do?",hint:"",isLabel:false,opts:[
-    {t:"Option A - I want to stay within my budget and keep my finances stress free.",m:"security"},
-    {t:"Option B - a better home reflects where I am in life.",m:"status"},
-    {t:"Neither yet - I will wait and save until I am fully ready.",m:"scarcity"},
-    {t:"Option B - the right opportunity is worth stretching for.",m:"abundance"},
-    {t:"Neither - I would rather stay on rent and keep my money invested.",m:"freedom"}
-  ]},
-  {setup:"You see someone who is truly wealthy and successful - great lifestyle, real impact.",action:"What thought comes first naturally?",hint:"",isLabel:false,opts:[
-    {t:"They can truly live life on their own terms.",m:"freedom"},
-    {t:"Must be nice - but how much risk and stress they must have taken.",m:"scarcity"},
-    {t:"I want to achieve this level of success in my life.",m:"status"},
-    {t:"They must have a very secure and stable life.",m:"security"},
-    {t:"They have not just built wealth - they have created a legacy.",m:"abundance"}
-  ]}
+  {
+    "setup": "What do you honestly think about money?",
+    "action": "",
+    "hint": "",
+    "isLabel": true,
+    "opts": [
+      {
+        "t": "Even when I have enough, I worry that money could run out.",
+        "m": "scarcity"
+      },
+      {
+        "t": "Money helps me feel secure and prepared for the future.",
+        "m": "security"
+      },
+      {
+        "t": "Money is a sign of success and recognition.",
+        "m": "status"
+      },
+      {
+        "t": "Money gives me freedom to choose how I live.",
+        "m": "freedom"
+      },
+      {
+        "t": "Money is a resource I can grow to achieve bigger goals.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "You see something expensive—a luxury watch or a weekend at a five-star hotel.",
+    "action": "What thought comes first naturally?",
+    "hint": "",
+    "isLabel": false,
+    "opts": [
+      {
+        "t": "I should not waste money on this right now.",
+        "m": "scarcity"
+      },
+      {
+        "t": "Maybe later—my family’s security comes first.",
+        "m": "security"
+      },
+      {
+        "t": "I have worked hard—why not enjoy the good things?",
+        "m": "status"
+      },
+      {
+        "t": "Money gives me the freedom to enjoy what I choose.",
+        "m": "freedom"
+      },
+      {
+        "t": "I would rather use this money to grow my wealth.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "Someone you trust recommends an investment with high potential returns, but it comes with risk.",
+    "action": "What is your first thought?",
+    "hint": "",
+    "isLabel": false,
+    "opts": [
+      {
+        "t": "What if I lose the money?",
+        "m": "scarcity"
+      },
+      {
+        "t": "Let me research this properly before I invest.",
+        "m": "security"
+      },
+      {
+        "t": "This is how wealthy, successful people invest.",
+        "m": "status"
+      },
+      {
+        "t": "This could free me from depending on just one income.",
+        "m": "freedom"
+      },
+      {
+        "t": "Such opportunities can create real wealth in the long run.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "What truly motivates you to earn money?",
+    "action": "",
+    "hint": "",
+    "isLabel": true,
+    "opts": [
+      {
+        "t": "I earn so I never have to worry about money running out.",
+        "m": "scarcity"
+      },
+      {
+        "t": "I earn to build a secure life for myself and my family.",
+        "m": "security"
+      },
+      {
+        "t": "I earn to achieve success and recognition.",
+        "m": "status"
+      },
+      {
+        "t": "I earn to have the freedom to live on my own terms.",
+        "m": "freedom"
+      },
+      {
+        "t": "I earn to build wealth that grows beyond my own earnings.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "Imagine you got a 20% salary hike.",
+    "action": "What would you most likely do first?",
+    "hint": "",
+    "isLabel": false,
+    "opts": [
+      {
+        "t": "Keep it safe—you never know when things go wrong.",
+        "m": "scarcity"
+      },
+      {
+        "t": "Put more towards savings and insurance for financial security.",
+        "m": "security"
+      },
+      {
+        "t": "Upgrade my lifestyle—a new phone, a better car, or that dream vacation.",
+        "m": "status"
+      },
+      {
+        "t": "Start building income beyond my job.",
+        "m": "freedom"
+      },
+      {
+        "t": "Invest more and grow my asset portfolio.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "You hear about a paid event where top professionals and industry leaders will be attending.",
+    "action": "What is your first thought?",
+    "hint": "",
+    "isLabel": false,
+    "opts": [
+      {
+        "t": "What if I spend the money and gain nothing?",
+        "m": "scarcity"
+      },
+      {
+        "t": "This could be helpful—but is it really worth the fee?",
+        "m": "security"
+      },
+      {
+        "t": "People who become successful usually attend such events.",
+        "m": "status"
+      },
+      {
+        "t": "The right connections here could open doors beyond my current job.",
+        "m": "freedom"
+      },
+      {
+        "t": "The right connections could help me grow a business or investment idea.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "You want to buy a home. Option A fits your budget. Option B costs more but has better features.",
+    "action": "What would you do?",
+    "hint": "",
+    "isLabel": false,
+    "opts": [
+      {
+        "t": "Even Option A makes me worry about committing so much money.",
+        "m": "scarcity"
+      },
+      {
+        "t": "Option A—I want to stay within my budget.",
+        "m": "security"
+      },
+      {
+        "t": "Option B—a better home reflects where I am in life.",
+        "m": "status"
+      },
+      {
+        "t": "Neither—I prefer renting for the freedom to move.",
+        "m": "freedom"
+      },
+      {
+        "t": "I would compare their long-term investment potential first.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "You come across a course or workshop that could add real value to your career. It costs around NPR 40,000–50,000.",
+    "action": "What is your first thought?",
+    "hint": "",
+    "isLabel": false,
+    "opts": [
+      {
+        "t": "I would worry about spending that much.",
+        "m": "scarcity"
+      },
+      {
+        "t": "Will this help me secure a stable job or income?",
+        "m": "security"
+      },
+      {
+        "t": "This qualification could help me stand out professionally.",
+        "m": "status"
+      },
+      {
+        "t": "This could give me more freedom in how I work.",
+        "m": "freedom"
+      },
+      {
+        "t": "These skills could grow my earning potential.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "You see someone who is wealthy and successful.",
+    "action": "What thought comes first naturally?",
+    "hint": "",
+    "isLabel": true,
+    "opts": [
+      {
+        "t": "What if they lose what they have built?",
+        "m": "scarcity"
+      },
+      {
+        "t": "They must feel financially secure.",
+        "m": "security"
+      },
+      {
+        "t": "I want to achieve this level of success in my life.",
+        "m": "status"
+      },
+      {
+        "t": "They can truly live life on their own terms.",
+        "m": "freedom"
+      },
+      {
+        "t": "Their wealth could help them create a lasting legacy.",
+        "m": "abundance"
+      }
+    ]
+  },
+  {
+    "setup": "You are considering a major purchase.",
+    "action": "What matters most to you?",
+    "hint": "",
+    "isLabel": false,
+    "opts": [
+      {
+        "t": "What if I need this money later?",
+        "m": "scarcity"
+      },
+      {
+        "t": "Does it fit my financial plan?",
+        "m": "security"
+      },
+      {
+        "t": "Will it enhance my social status?",
+        "m": "status"
+      },
+      {
+        "t": "Will it give me more freedom or flexibility?",
+        "m": "freedom"
+      },
+      {
+        "t": "Will it leave enough money for future growth?",
+        "m": "abundance"
+      }
+    ]
+  }
 ];
-var GOALS=["Pay off my current loans and become debt free","Build an emergency fund that covers 6 months of expenses","Get proper life and health insurance to protect my family","Support my family back home financially","Buy my own home","Save for my children's education","Create passive income streams beyond my salary","Start or grow my own business","Build a retirement fund so I never have to depend on anyone","Build long term wealth through smart investments and property"];
-var RC={"0-2":["A clear idea of your monthly income and expenses","A clear plan to pay off any existing loans","Started a small monthly savings habit","Basic health insurance in place"],"3-7":["Actively paying off loans and working towards being debt free","An emergency fund that covers 6 months of expenses","Life and health insurance in place","Started a regular monthly investment"],"8-15":["If any major loan is taken — a clear debt payoff plan is in place","An emergency fund covering 6 months of expenses","Adequate life and health insurance for your family","Regular investments across at least 2 asset classes","A clear retirement plan in place"],"15+":["Comprehensive insurance coverage for your family","A fully funded emergency reserve","A diversified investment portfolio","A retirement corpus that is fully on track","At least one source of income beyond your salary"]};
+var GOALS=["Pay off my loans and become debt-free", "Build savings for emergencies", "Get suitable health and life insurance", "Support my parents or family financially", "Buy my own home", "Save for my children’s education", "Build an additional source of income", "Start or grow my own business", "Save for a financially secure retirement", "Build long-term wealth through investments", "Save for a personal goal—travel, further studies or a major purchase", "Other—please specify"];
+var FOUNDATIONS=["A clear picture of your monthly income and expenses", "A plan to repay any loans", "Savings for emergencies, based on your expenses and responsibilities", "Health insurance, and life insurance where someone depends on your income", "Regular saving or investing that fits your goals, time available and comfort with risk", "A plan for retirement and other long-term needs"];
 var MD={
-  scarcity:{
-    label:"The Survivor",
-    desc:"You feel money is hard to earn and even harder to protect. The thought of losing it, spending too much, or taking a risk makes you uneasy. Deep down there is always a quiet worry — what if it is not enough? More than anything, you need to feel there is always enough.",
-    descBox:"For you financial safety is not just a goal — it is a necessity.",
-    decisions:"When it comes to money, every decision is driven by one thing — \"staying safe\". You avoid unnecessary risks, think twice before spending and always make sure there is a buffer. Taking risks or stretching your budget does not come naturally to you. And deep down there is always one question — what if things go wrong?",
-    sec:{security:"a need to feel financially safe and prepared",status:"a desire to experience the luxury and comfort you deserve",freedom:"a choice to live life on your own terms",abundance:"a belief that money can create something much bigger"},
-    self:"someone who treats every rupee carefully because money feels hard to earn and easy to lose",
-    sync:"Your mindset and your financial decisions are pointing in the same direction. What you believe about money and how you actually behave with it — they match.",
-    syncBox:"That kind of clarity is rare. And it is a powerful place to build from.",
-    bigger:"But your day to day financial decisions show a more cautious and careful pattern.",
-    biggerBox:"There is a gap between how you see yourself and how you actually behave with money — and that gap may be quietly holding you back from the financial life you truly want.",
-    bolder:"But your financial decisions actually show more ambition and boldness than you give yourself credit for.",
-    bolderBox:"You may be underestimating yourself — and your true financial potential."
+  "scarcity": {
+    "label": "The Survivor",
+    "theme": "protecting money from loss",
+    "desc": "For you, money often brings a question: “What if I need it later?” You may have enough for a short holiday, but feel better keeping the money in your bank account. A course may help your career, but you wonder, “What if I pay and get nothing from it?” Being careful can help you protect your money. But worry may sometimes stop you from enjoying something you can afford or trying something that could help you.",
+    "descBox": "A plan for everyday needs and emergencies can help you feel safer using some money for yourself and your future.",
+    "decisions": "Before spending or investing, the possible loss may be the first thing on your mind. For example, even a useful course can feel uncomfortable when the benefit is uncertain. Having money set aside may matter more to you than taking the opportunity.",
+    "strength": "You may notice costs and possible losses before committing your money.",
+    "blind": "Worry may sometimes lead you to delay a useful opportunity, even when it fits your budget."
   },
-  security:{
-    label:"The Planner",
-    desc:"You feel money is a way to build a stable and secure life — and you take that seriously. Before you spend, invest or commit to anything financial, you think before you act. You are not afraid of money — you just want to make sure every decision is the right one. For you peace of mind is worth more than any risk or reward.",
-    descBox:"You do not just want a good life — you want a secure one.",
-    decisions:"Your financial decisions are guided by one thing — stability. You research before you invest, plan before you act and always make sure you are covered. You never act on impulse. Because for you peace of mind matters more than any quick gain.",
-    sec:{scarcity:"a tendency to play safe",status:"a desire to experience the luxury and comfort you deserve",freedom:"a choice to live life on your own terms",abundance:"a belief that money can create something much bigger"},
-    self:"someone who plans carefully because financial stability is everything to them",
-    sync:"Your mindset and your financial decisions are pointing in the same direction. What you believe about money and how you actually behave with it — they match.",
-    syncBox:"That kind of clarity is rare. And it is a powerful place to build from.",
-    bigger:"But your day to day financial decisions show a more responsible and stability focused pattern.",
-    biggerBox:"There is a gap between how you see yourself and how you actually behave with money — and that gap may be quietly holding you back from the financial life you truly want.",
-    bolder:"But your financial decisions actually show more ambition and boldness than you give yourself credit for.",
-    bolderBox:"You may be underestimating yourself — and your true financial potential."
+  "security": {
+    "label": "The Planner",
+    "theme": "security and preparation",
+    "desc": "For you, money may bring peace of mind when you know what it is meant for. Before booking a holiday, you might check that bills, savings and family needs are covered. Before joining a course, you may want to know how it will support your work or income. A plan can help you make these decisions with confidence. Sometimes, though, waiting for everything to feel certain may make it harder to try something new.",
+    "descBox": "A secure foundation can give you room to enjoy today and explore tomorrow.",
+    "decisions": "You may first ask whether a choice fits your plan and keeps your family secure. A salary increase might go towards savings or insurance before a lifestyle upgrade. You may feel more comfortable investing after checking the details.",
+    "strength": "You may plan ahead and keep everyday needs and future responsibilities in view.",
+    "blind": "Waiting for complete certainty may sometimes delay a worthwhile choice."
   },
-  status:{
-    label:"The Achiever",
-    desc:"You feel money is a reflection of your hard work and achievement in life. You are ambitious, driven and always looking for the next milestone. For you money is not just about paying bills — it is about building a life that gives you all the luxury and comfort you deserve.",
-    descBox:"You do not just want to earn — you want to make your mark.",
-    decisions:"Your financial decisions are driven by one thing — progress. You spend on things that reflect your success, invest in opportunities that set you apart and always push for the next level. For you money is not just a number — it is a statement of how far you have come.",
-    sec:{scarcity:"a tendency to play safe",security:"a need to feel financially safe and prepared",freedom:"a choice to live life on your own terms",abundance:"a belief that money can create something much bigger"},
-    self:"someone who is ambitious, driven and sees money as a reflection of how far they have come",
-    sync:"Your mindset and your financial decisions are pointing in the same direction. What you believe about money and how you actually behave with it — they match.",
-    syncBox:"That kind of clarity is rare. And it is a powerful place to build from.",
-    bigger:"But your day to day financial decisions show a pattern more focused on progress, recognition and visible success.",
-    biggerBox:"There is a gap between how you see yourself and how you actually behave with money — and that gap may be quietly holding you back from the financial life you truly want.",
-    bolder:"But your financial decisions actually show more independence and expansive thinking than you give yourself credit for.",
-    bolderBox:"You may be underestimating yourself — and your true financial potential."
+  "status": {
+    "label": "The Achiever",
+    "theme": "success and recognition",
+    "desc": "For you, money may be a way to see how far you have come. A better home, a special holiday or a qualification that helps you stand out can feel like a reward for your work. Recognition may encourage you to aim higher. Sometimes, though, what looks successful to others can become more important than what works for your own life.",
+    "descBox": "Enjoy your achievements while keeping room for the goals that matter to you.",
+    "decisions": "You may notice how a choice reflects your progress. After a salary increase, a better phone or a holiday might feel like a well-earned reward. A course or event may appeal because it could help you stand out professionally.",
+    "strength": "Your wish to achieve may encourage you to work towards meaningful milestones.",
+    "blind": "Comparison with others may sometimes influence spending more than your own priorities."
   },
-  freedom:{
-    label:"The Free Spirit",
-    desc:"You feel money is about having choices — and that matters deeply to you. You do not want to be tied down to one job, one income or one way of living. For you the best thing money can buy is not a product or a house — it is freedom. Living life completely on your own terms is not a dream — it is the only way.",
-    descBox:"You do not just want to be comfortable — you want to be free.",
-    decisions:"Your financial decisions are driven by one thing — freedom. You spend without guilt and invest in yourself. The idea is to build multiple sources of income — so you are never tied to just one. Because for you the real goal is simple — live life completely on your own terms.",
-    sec:{scarcity:"a tendency to play safe",security:"a need to feel financially safe and prepared",status:"a desire to experience the luxury and comfort you deserve",abundance:"a belief that money can create something much bigger"},
-    self:"someone who sees money as a way to live life completely on their own terms",
-    sync:"Your mindset and your financial decisions are pointing in the same direction. What you believe about money and how you actually behave with it — they match.",
-    syncBox:"That kind of clarity is rare. And it is a powerful place to build from.",
-    bigger:"But your day to day financial decisions show a pattern more focused on independence and building options for yourself.",
-    biggerBox:"There is a gap between how you see yourself and how you actually behave with money — and that gap may be quietly holding you back from the financial life you truly want.",
-    bolder:"But your financial decisions actually show more expansive and bold thinking than you give yourself credit for.",
-    bolderBox:"You may be underestimating yourself — and your true financial potential."
+  "freedom": {
+    "label": "The Free Spirit",
+    "theme": "independence and choice",
+    "desc": "For you, money may mean being able to choose how you live and work. You might prefer renting if it lets you move easily, or consider a course because it opens options beyond your current job. Building income beyond a salary may appeal because it could give you more control over your time. Freedom still needs a foundation: savings and a clear plan can make those choices easier to sustain.",
+    "descBox": "Build the financial support that helps your freedom last.",
+    "decisions": "You may ask whether a choice gives you more flexibility. A course could mean new ways to work, while extra income could reduce dependence on one job. You may be less interested in owning something if it ties up money or limits your choices.",
+    "strength": "You may see ways to use money to create more options for your life.",
+    "blind": "A wish to stay flexible may sometimes make regular saving or long-term commitments easy to postpone."
   },
-  abundance:{
-    label:"The Visionary",
-    desc:"You feel money is a powerful tool — to create wealth and lasting impact. While others save for tomorrow, you are thinking years ahead. Taking calculated risks, investing in ideas and making your money grow feels more natural to you than simply saving for safety.",
-    descBox:"Your focus is not quick gains — it is lasting impact.",
-    decisions:"Your financial decisions are driven by one thing — growth. You think big, take calculated risks and always invest for the long term. Every opportunity is a chance to build something bigger. For you money is not something you save and protect — it is something you grow and multiply.",
-    sec:{scarcity:"a tendency to play safe",security:"a need to feel financially safe and prepared",status:"a desire to experience the luxury and comfort you deserve",freedom:"a choice to live life on your own terms"},
-    self:"someone who sees money as a tool to build something far bigger than just a good life",
-    sync:"Your mindset and your financial decisions are pointing in the same direction. What you believe about money and how you actually behave with it — they match.",
-    syncBox:"That kind of clarity is rare. And it is a powerful place to build from.",
-    bigger:"But your day to day financial decisions show a more cautious and careful pattern.",
-    biggerBox:"There is a gap between how you see yourself and how you actually behave with money — and that gap may be quietly holding you back from the financial life you truly want.",
-    bolder:"But your financial decisions actually show far more boldness, vision and expansive thinking than you give yourself credit for.",
-    bolderBox:"You may be significantly underestimating yourself — and your true financial potential."
+  "abundance": {
+    "label": "The Visionary",
+    "theme": "growth and lasting impact",
+    "desc": "For you, money may feel like something you can build into more possibilities over time. You might see a course as a way to grow your earning potential, or a useful connection as the start of a business idea. A salary increase may make you think about investing more. Looking ahead can help you build for the future, but a promising idea still needs careful checks and a place in your budget.",
+    "descBox": "Give your bigger goals a plan, and check the risks before committing money.",
+    "decisions": "You may first notice what an opportunity could grow into. A course could increase your future earnings, and extra salary could add to your investments. Before a major purchase, you may think about how much money will remain for future growth.",
+    "strength": "You may connect today’s opportunities with what you want to build over time.",
+    "blind": "Excitement about future growth may sometimes make costs, uncertainty or possible losses easier to overlook."
   }
 };
 
@@ -913,7 +1110,7 @@ function nextQ(){if(curQ<9){curQ++;renderQ();}else{showGoals();}}
 function prevQ(){if(curQ>0){curQ--;renderQ();}}
 function goBackToQ(){curQ=9;showScreen('screen-questions');renderQ();}
 function showGoals(){
-  selGoals=[];var list=document.getElementById('g-list');list.innerHTML='';
+  selGoals=[];document.getElementById('other-goal').value='';var list=document.getElementById('g-list');list.innerHTML='';
   GOALS.forEach(function(goal,i){
     var btn=document.createElement('button');btn.className='goal-item';
     btn.innerHTML='<span class="goal-check"></span><span class="goal-text">'+goal+'</span>';
@@ -928,213 +1125,104 @@ function togGoal(idx,btn){
   else{if(selGoals.length>=3)return;selGoals.push(idx);btn.classList.add('selected');btn.querySelector('.goal-check').textContent='v';}
   updGC();
 }
-function updGC(){document.getElementById('g-count').textContent=selGoals.length;document.getElementById('g-submit').disabled=selGoals.length!==3;}
+function goalsValid(){
+  return selGoals.length>=1 && selGoals.length<=3 &&
+    (selGoals.indexOf(GOALS.length-1)===-1 || document.getElementById('other-goal').value.trim().length>0);
+}
+function updGC(){
+  document.getElementById('g-count').textContent=selGoals.length;
+  document.getElementById('other-goal-wrap').hidden=selGoals.indexOf(GOALS.length-1)===-1;
+  document.getElementById('g-submit').disabled=!goalsValid();
+}
+function topThemes(counts){
+  var max=Math.max.apply(null,MO.map(function(m){return counts[m];}));
+  return max>0 ? MO.filter(function(m){return counts[m]===max;}) : [];
+}
 function calcSc(){
-  // LABEL = Q1 (index 0) + Q4 (index 3)
-  var q1m = answers[0]!==null ? QS[0].opts[answers[0]].m : null;
-  var q4m = answers[3]!==null ? QS[3].opts[answers[3]].m : null;
-  var label = null;
-  var seeker = false;
-
-  var limitedGroup = ['scarcity','security'];
-  var growthGroup = ['status','freedom','abundance'];
-
-  if(q1m && q4m){
-    if(q1m === q4m){
-      // Exact match — clear label
-      label = q1m;
-    } else {
-      var q1limited = limitedGroup.indexOf(q1m) > -1;
-      var q4limited = limitedGroup.indexOf(q4m) > -1;
-      var q1growth = growthGroup.indexOf(q1m) > -1;
-      var q4growth = growthGroup.indexOf(q4m) > -1;
-
-      if(q1limited && q4limited){
-        // Both limited group — use Q1
-        label = q1m;
-      } else if(q1growth && q4growth){
-        // Both growth group — use Q1
-        label = q1m;
-      } else {
-        // One from each group — genuine conflict = Seeker
-        seeker = true;
-      }
-    }
-  } else if(q1m){ label = q1m; }
-  else if(q4m){ label = q4m; }
-
-  // BEHAVIOUR = 8 questions (excluding Q1 and Q4)
-  var behIndices = [1,2,4,5,6,7,8,9];
-  var behCounts = {scarcity:0,security:0,status:0,freedom:0,abundance:0};
-  behIndices.forEach(function(i){
-    if(answers[i]!==null){ behCounts[QS[i].opts[answers[i]].m]++; }
+  var counts={scarcity:0,security:0,status:0,freedom:0,abundance:0};
+  var beliefs={scarcity:0,security:0,status:0,freedom:0,abundance:0};
+  var choices={scarcity:0,security:0,status:0,freedom:0,abundance:0};
+  QS.forEach(function(q,i){
+    if(answers[i]===null || !q.opts[answers[i]])return;
+    var m=q.opts[answers[i]].m;
+    counts[m]++;
+    (q.isLabel ? beliefs : choices)[m]++;
   });
-
-  var MO2=['scarcity','security','status','freedom','abundance'];
-
-  // Primary = one mindset scores 50% or more (4 out of 8)
-  var primary = null;
-  MO2.forEach(function(m){ if(behCounts[m]>=4) primary=m; });
-
-  // Inconsistent = no mindset reaches 50%
-  var inconsistent = primary===null;
-
-  // If inconsistent set primary to highest for reference only
-  if(inconsistent){
-    primary = MO2.reduce(function(a,b){return behCounts[a]>=behCounts[b]?a:b;});
-  }
-
-  // Secondary = second highest is clear with no tie (only when primary exists)
-  var secondary = null;
-  if(!inconsistent){
-    var sorted = MO2.filter(function(m){return m!==primary;}).sort(function(a,b){return behCounts[b]-behCounts[a];});
-    if(sorted.length>=2 && behCounts[sorted[0]] > behCounts[sorted[1]]){
-      secondary = sorted[0];
-    }
-  }
-
-  return{label:label, seeker:seeker, q1m:q1m, q4m:q4m, primary:primary, secondary:secondary, inconsistent:inconsistent, behCounts:behCounts};
+  return {counts:counts,beliefs:beliefs,choices:choices,
+    leading:topThemes(counts),beliefLeading:topThemes(beliefs),choiceLeading:topThemes(choices)};
+}
+function themeNames(themes){
+  return themes.map(function(m){return MD[m].theme;}).join(' and ');
+}
+function narrativeParagraphs(text,css){
+  return '<p class="'+css+'">'+text+'</p>';
 }
 function generateReport(){
+  if(!goalsValid() || answers.some(function(a,i){return a===null || !QS[i].opts[a];}))return;
   var sc=calcSc();
   var fn=escapeHTML(user.name.split(' ')[0]);
-  var ri=RC[user.exp]||RC['3-7'];
-  var gl=selGoals.map(function(i){return GOALS[i];});
+  var ri=FOUNDATIONS;
+  var gl=selGoals.map(function(i){return i===GOALS.length-1 ? document.getElementById('other-goal').value.trim() : GOALS[i];});
 
-  // Determine what to show
-  var md = sc.seeker ? null : MD[sc.label];
-  var behMd = MD[sc.primary];
+  var intro='Based on your answers, here is what your money mindset may look like.';
+  var blend=sc.leading.length>1;
+  var title=blend ? 'A Blend of Money Mindsets' : MD[sc.leading[0]].label;
+  var mindsetHTML='<div class="section-label">Your Money Mindset</div>'
+    +'<p class="section-body-light">'+intro+'</p>'
+    +'<div class="mindset-label-big">'+title+'</div>';
+  if(blend){
+    mindsetHTML+=narrativeParagraphs('Your answers give equal weight to '+themeNames(sc.leading)+'. Several priorities can matter at the same time; you do not have to fit into one style.','section-body-light');
+  }else{
+    mindsetHTML+=narrativeParagraphs('The theme you chose most often was '+themeNames(sc.leading)+'. Other priorities may also matter to you.','section-body-light');
+  }
+  sc.leading.forEach(function(m){
+    if(blend)mindsetHTML+='<h3 style="color:var(--gold);margin-top:18px">'+MD[m].label+'</h3>';
+    mindsetHTML+=narrativeParagraphs(MD[m].desc,'section-body-light')
+      +'<div class="decisions-secondary" style="font-style:italic">'+MD[m].descBox+'</div>';
+  });
+  mindsetHTML+='<p class="section-body-light" style="margin-top:20px;font-size:13px">Across your 10 answers: '
+    +MO.map(function(m){return MD[m].label+' '+sc.counts[m]+'/10';}).join(' · ')
+    +'. These counts describe the themes in your answers, not how well you manage money.</p>';
 
-  // MINDSET SECTION
-  var mindsetHTML = '';
-  if(sc.seeker){
-    // The Seeker
-    var q1term = {
-      scarcity:"hard to earn and easy to lose",
-      security:"a way to build a stable and comfortable life",
-      status:"a reflection of success and hard work",
-      freedom:"a way to live life completely on your own terms",
-      abundance:"an opportunity to create something bigger"
+  var decisionsHTML='';
+  if(sc.choiceLeading.length>1){
+    decisionsHTML+=narrativeParagraphs('Your choices give equal weight to '+themeNames(sc.choiceLeading)+'. For example, you may want security when buying a home and flexibility when considering your work. Different situations can bring different needs into focus.','decisions-primary');
+  }else{
+    decisionsHTML+=narrativeParagraphs('In the situations we asked about, '+themeNames(sc.choiceLeading)+' came first most often.','decisions-primary');
+    decisionsHTML+=narrativeParagraphs(MD[sc.choiceLeading[0]].decisions,'decisions-primary');
+  }
+
+  var same=sc.beliefLeading.length===sc.choiceLeading.length &&
+    sc.beliefLeading.every(function(m){return sc.choiceLeading.indexOf(m)>-1;});
+  var syncLabel,stxt,sbox;
+  if(sc.beliefLeading.length>1 || sc.choiceLeading.length>1){
+    syncLabel='Several Priorities';
+    stxt='When thinking about what money means to you, '+themeNames(sc.beliefLeading)+' stood out. In the situations we asked about, '+themeNames(sc.choiceLeading)+' stood out. You may be balancing more than one priority. For example, wanting more freedom can sit alongside keeping money safe for your family.';
+    sbox='Use your goals to decide which priority needs more attention right now.';
+  }else if(same){
+    syncLabel='A Similar Priority';
+    var matchExample={
+      scarcity:'A worry about money running out may go alongside keeping extra salary safe.',
+      security:'A wish for security may go alongside choosing a home within your budget.',
+      status:'A wish for recognition may go alongside choosing a course that helps you stand out.',
+      freedom:'A wish to live on your own terms may go alongside building income beyond your job.',
+      abundance:'A wish to grow wealth may go alongside investing more of a salary increase.'
     };
-    var q4term = {
-      scarcity:"a safety net — so you never have to struggle",
-      security:"a foundation — to protect yourself and your loved ones",
-      status:"a ladder — to build a successful life",
-      freedom:"a key to live life completely on your own terms",
-      abundance:"a chance to build something much bigger than just a salary"
-    };
-    var seekerDesc = 'Your answers reveal something real — money means different things to you on different days. Some days you think money is '+(q1term[sc.q1m]||'different things')+'. Other days you see money as '+(q4term[sc.q4m]||'something else')+'.';
-    seekerDesc += ' Your money beliefs keep changing with situations in life and this is not because you are careless. You are still figuring it out. In today\'s world where social media, colleagues and family pressure are constantly influencing us, this is completely normal.';
-    mindsetHTML = '<div class="section-label">Your Money Mindset</div>'
-      +'<div class="mindset-label-big">The Seeker</div>'
-      +'<p class="section-body-light">'+seekerDesc+'</p>';
-  } else {
-    mindsetHTML = '<div class="section-label">Your Money Mindset</div>'
-      +'<div class="mindset-label-big">'+md.label+'</div>'
-      +'<p class="section-body-light">'+md.desc+'</p>'
-      +'<div class="decisions-secondary" style="font-style:italic">'+md.descBox+'</div>';
+    stxt='What you want from money and the choices you selected point towards '+themeNames(sc.beliefLeading)+'. '+matchExample[sc.beliefLeading[0]]+' Your answers show a similar priority across these questions.';
+    sbox='A practical plan can help you turn that priority into everyday steps.';
+  }else{
+    syncLabel='Different Priorities';
+    stxt='When thinking about money, '+themeNames(sc.beliefLeading)+' stood out. In the situations we asked about, '+themeNames(sc.choiceLeading)+' came first more often. For example, you may value growing wealth while choosing to protect savings when an investment feels risky. Your responsibilities, available money and the situation can all affect a choice.';
+    sbox='A difference does not mean something is wrong. Consider how your choices support what matters to you now and in the future.';
   }
-
-  // FINANCIAL DECISIONS
-  var decisionsHTML = '';
-  if(sc.inconsistent){
-    decisionsHTML = '<p class="decisions-primary">Your financial decisions do not follow one clear pattern — they change based on what is happening in your life. You might be saving in one area but overspending in another. There is no consistent direction yet. And without direction, achieving financial goals is difficult.</p>';
-  } else {
-    decisionsHTML = '<p class="decisions-primary">'+behMd.decisions+'</p>';
-    if(sc.secondary && behMd.sec[sc.secondary]){
-      decisionsHTML += '<div class="decisions-secondary">But sometimes your decisions also reflect '+behMd.sec[sc.secondary]+'.</div>';
-    }
-  }
-
-  // THOUGHTS VS ACTIONS — 8 scenarios
-  var thoughtsHTML = '';
-  var syncClass = 'gap';
-  var syncLabel = '';
-  var stxt = '';
-  var sbox = '';
-
-  var cautious = ['scarcity','security'];
-  var ambitious = ['status','freedom','abundance'];
-
-  var labelInCautious = !sc.seeker && cautious.indexOf(sc.label) > -1;
-  var labelInAmbitious = !sc.seeker && ambitious.indexOf(sc.label) > -1;
-  var primInCautious = cautious.indexOf(sc.primary) > -1;
-  var primInAmbitious = ambitious.indexOf(sc.primary) > -1;
-
-  if(sc.seeker && sc.inconsistent){
-    // Scenario E
-    syncClass = 'gap';
-    syncLabel = 'Still Figuring It Out';
-    stxt = 'An honest observation — there is no clear direction yet when it comes to your money. When decisions are driven by situations and not by goals — it becomes very hard to make real progress, no matter how hard you work or how much you earn.\n\nThe good thing is — you paused and asked this question. Most people never do.';
-    sbox = 'What you need is a clear plan — one that starts with your financial goals and gives you a simple roadmap to get there.';
-
-  } else if(sc.seeker && !sc.inconsistent){
-    // Scenario D
-    syncClass = 'gap';
-    syncLabel = 'A Gap Detected';
-    stxt = 'Here is something interesting — you may not be sure what you believe about money, but the way you actually handle it day to day tells a clear story. You are ' + behMd.self + '.';
-    sbox = 'All you need is a roadmap that aligns your money beliefs with your financial decisions — and you can start living the life you want.';
-
-  } else if(!sc.seeker && sc.inconsistent){
-    // Scenario H — clear label but inconsistent behaviour
-    syncClass = 'gap';
-    syncLabel = 'A Gap Detected';
-    if(sc.label === 'scarcity'){
-      // H1 — Survivor + inconsistent
-      stxt = 'Your relationship with money is driven more by worry than by purpose. This is also showing up in your day to day financial decisions. And if this continues, reaching your financial goals may become difficult.';
-      sbox = 'The first step is building a clear roadmap — one that brings clarity and takes you from fear to confidence.';
-    } else {
-      // H2 — Planner, Achiever, Free Spirit, Visionary + inconsistent
-      stxt = 'You have a clear sense of what you want from money — but your day to day financial decisions don\'t reflect that yet. And if this continues, reaching your financial goals will take much longer than it should.';
-      sbox = 'The next step is turning what you believe into a plan — one that makes sure your actions start matching your goals.';
-    }
-
-  } else if(sc.label === sc.primary){
-    // Scenario A — in sync
-    syncClass = 'in-sync';
-    syncLabel = 'In Sync';
-    stxt = 'You see yourself as ' + md.self + ' — and your day to day financial decisions reflect the same. Your thoughts and actions are aligned. You know yourself well — and this self awareness is a great starting point for building a strong financial future.';
-    sbox = 'The next step is turning this clarity into a plan that works best for you.';
-
-  } else if(labelInCautious && primInCautious){
-    // Scenario F — both cautious (Survivor/Planner cross)
-    syncClass = 'in-sync';
-    syncLabel = 'In Sync';
-    stxt = 'You see yourself as someone who is cautious and careful with money matters — and your day to day financial decisions reflect the same. This self awareness is a great starting point for building a strong financial future.';
-    sbox = 'The next step is turning this clarity into a plan — it helps you build the stable and secure life you want.';
-
-  } else if(labelInAmbitious && primInAmbitious){
-    // Scenario G — both ambitious (Achiever/Free Spirit/Visionary cross)
-    syncClass = 'in-sync';
-    syncLabel = 'In Sync';
-    stxt = 'You see yourself as someone who is clear and confident with money matters — and your day to day financial decisions reflect the same. This self awareness is a great starting point for building a strong financial future.';
-    sbox = 'The next step is turning this clarity into a plan — one that helps you build the life you truly want.';
-
-  } else if(labelInCautious && primInAmbitious){
-    // Scenario B — label cautious, behaviour ambitious
-    syncClass = 'gap';
-    syncLabel = 'A Gap Detected';
-    stxt = 'You see yourself as ' + md.self + ' — but your day to day financial decisions tell a different story. The way you handle money shows that you are ambitious and aspire to build a strong financial life.';
-    sbox = 'With the right roadmap, you can truly build the life you want.';
-
-  } else if(labelInAmbitious && primInCautious){
-    // Scenario C — label ambitious, behaviour cautious
-    syncClass = 'gap';
-    syncLabel = 'A Gap Detected';
-    stxt = 'You see yourself as ' + md.self + ' — but your day to day financial decisions tell a different story. The way you handle money is actually more cautious and careful than you realise. There is a gap between what you believe and how you act — and this gap is holding you back.';
-    sbox = 'But with the right roadmap, you can start building the life you truly want.';
-
-  } else {
-    // Fallback
-    syncClass = 'gap';
-    syncLabel = 'A Gap Detected';
-    stxt = 'You see yourself as ' + md.self + ' — but your day to day financial decisions tell a different story.';
-    sbox = 'With the right roadmap, you can start building the life you truly want.';
-  }
-
-  thoughtsHTML = '<div class="sync-badge '+syncClass+'">'+syncLabel+'</div>'
-    +'<p class="section-body" style="margin-bottom:12px;white-space:pre-line">'+stxt+'</p>'
+  var thoughtsHTML='<div class="sync-badge '+(same?'in-sync':'gap')+'">'+syncLabel+'</div>'
+    +narrativeParagraphs(stxt,'section-body')
     +'<div class="decisions-secondary" style="font-style:italic">'+sbox+'</div>';
+  var strengthsHTML=sc.leading.map(function(m){
+    return (blend?'<h3 style="margin-top:16px">'+MD[m].label+'</h3>':'')
+      +'<p class="section-body"><strong>What may help you:</strong> '+MD[m].strength+'</p>'
+      +'<p class="section-body"><strong>What to watch for:</strong> '+MD[m].blind+'</p>';
+  }).join('');
 
   var waIcon='<svg class="wa-svg" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
 
@@ -1150,32 +1238,35 @@ function generateReport(){
     +'<div class="report-section report-section-hero fade-in">'+mindsetHTML+'</div>'
 
     +'<div class="report-section fade-in">'
-    +'<div class="section-label">Your Financial Decisions</div>'
+    +'<div class="section-label">What Guides Your Money Choices</div>'
     +'<div class="section-divider"></div>'
     +decisionsHTML
     +'</div>'
 
     +'<div class="report-section fade-in">'
-    +'<div class="section-label">Your Thoughts vs Your Actions</div>'
+    +'<div class="section-label">Your Beliefs and Your Choices</div>'
     +'<div class="section-divider"></div>'
     +thoughtsHTML
     +'</div>'
 
     +'<div class="report-section fade-in">'
+    +'<div class="section-label">Your Strengths and What to Watch For</div>'
+    +'<div class="section-divider"></div>'+strengthsHTML+'</div>'
+    +'<div class="report-section fade-in">'
     +'<div class="section-label">Your Financial Journey</div>'
     +'<div class="section-divider"></div>'
-    +'<p class="section-body" style="margin-bottom:4px;font-weight:600;color:var(--ink)">Your Top 3 Financial Goals</p>'
+    +'<p class="section-body" style="margin-bottom:4px;font-weight:600;color:var(--ink)">Your Financial Goals</p>'
     +'<p class="section-body" style="margin-bottom:0">Based on what you shared, here is what you are working toward:</p>'
     +'<div class="goals-box"><ul class="goal-list">'
-    +gl.map(function(g,i){return '<li style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid #E0D8CC"><span style="width:26px;height:26px;min-width:26px;border-radius:6px;background:#1A4A30;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:DM Sans,sans-serif">'+(i+1)+'</span><span style="font-size:14px;color:#1A1612">'+g+'</span></li>';}).join('')
+    +gl.map(function(g,i){return '<li style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid #E0D8CC"><span style="width:26px;height:26px;min-width:26px;border-radius:6px;background:#1A4A30;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:DM Sans,sans-serif">'+(i+1)+'</span><span style="font-size:14px;color:#1A1612">'+escapeHTML(g)+'</span></li>';}).join('')
     +'</ul></div></div>'
 
     +'<div class="report-section fade-in">'
-    +'<div class="section-label">Your Financial Reality Check</div>'
+    +'<div class="section-label">Your Financial Foundations</div>'
     +'<div class="section-divider"></div>'
-    +'<p class="section-body" style="margin-bottom:8px">With '+user.exp+' years of experience, ideally you should already have:</p>'
+    +'<p class="section-body" style="margin-bottom:8px">Your answers do not tell us which of these are already in place. Use this checklist to review what you have and what needs attention:</p>'
     +'<div class="goals-box"><ul class="goal-list">'+ri.map(function(item){return '<li style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid #E0D8CC"><span style="width:26px;height:26px;min-width:26px;border-radius:6px;background:#1A4A30;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;font-family:DM Sans,sans-serif">&#10003;</span><span style="font-size:14px;color:#1A1612">'+item+'</span></li>';}).join('')+'</ul></div>'
-    +'<div class="reality-note">If some of these are missing - you are not alone. This is exactly what we work on together.</div>'
+    +'<div class="reality-note">Start with the areas that matter most for your current situation. You do not have to build everything at once.</div>'
     +'</div>'
 
     +'<div class="about-section fade-in">'
@@ -1194,7 +1285,7 @@ function generateReport(){
     +'<a href="https://wa.me/9779849849876" target="_blank" rel="noopener noreferrer" class="btn-cta-wa">'+waIcon+' Message on WhatsApp</a>'
     +'</div>'
     +'</div>'
-    +'<div class="disclaimer fade-in"><strong style="display:block;font-size:13px;font-weight:700;color:#4A4A5A;margin-bottom:8px;letter-spacing:0.05em;text-transform:uppercase">Disclaimer</strong>This report has been independently designed by Khushbu Choudhary solely for the purpose of creating financial awareness among Nepalese professionals. The content, framework and questions are original and created for educational purposes only. This is not personalised financial advice. For a financial plan tailored to your specific situation, please reach out to Khushbu directly.</div>'
+    +'<div class="disclaimer fade-in"><strong style="display:block;font-size:13px;font-weight:700;color:#4A4A5A;margin-bottom:8px;letter-spacing:0.05em;text-transform:uppercase">Disclaimer</strong>This report has been independently designed by Khushbu Choudhary solely for the purpose of creating financial awareness among Nepalese professionals. This short assessment is a reflection tool, not a validated psychological test. It describes the priorities in your answers and does not assess your financial health or actual behaviour. It is for educational purposes and is not personalised financial advice. For a financial plan tailored to your specific situation, please reach out to Khushbu directly.</div>'
     +'<button onclick="shareAssessment()" class="btn-share-friend">&#128101; Help a friend understand their money mindset</button>';
 
   // Set photo
@@ -1247,7 +1338,7 @@ async function saveReportPDF() {
       image: {type: 'jpeg', quality: .96},
       html2canvas: {scale: 1.5, useCORS: true, scrollY: 0, windowWidth: 794},
       jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'},
-      pagebreak: {mode: ['css','legacy'], avoid: ['.report-section','.about-section','.disclaimer']}
+      pagebreak: {mode: ['css','legacy'], avoid: ['.report-section:not(.report-section-hero)','.about-section','.disclaimer','p','.decisions-secondary']}
     }).from(clone).save();
     status.textContent = 'PDF ready. Check your downloads or your browser’s save options.';
   } catch (error) {
