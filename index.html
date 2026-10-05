@@ -662,8 +662,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
     </p>
     <div class="transition-pills">
       <div class="pill"><strong>10</strong> Questions</div>
-      <div class="pill"><strong>5</strong> Mindsets</div>
-      <div class="pill"><strong>1</strong> Free Report</div>
+      <div class="pill">Under <strong>5</strong> Minutes</div>
+      <div class="pill">Free Report</div>
     </div>
     <button class="btn-gold" onclick="startQuestions()">Let's Begin &rarr;</button>
   </div>
@@ -1002,7 +1002,7 @@ var QS=[
   }
 ];
 var GOALS=["Pay off my loans and become debt-free", "Build savings for emergencies", "Get suitable health and life insurance", "Support my parents or family financially", "Buy my own home", "Save for my children’s education", "Build an additional source of income", "Start or grow my own business", "Save for a financially secure retirement", "Build long-term wealth through investments", "Save for a personal goal—travel, further studies or a major purchase", "Other—please specify"];
-var FOUNDATIONS=["A clear picture of your monthly income and expenses", "A plan to repay any loans", "Savings for emergencies, based on your expenses and responsibilities", "Health insurance, and life insurance where someone depends on your income", "Regular saving or investing that fits your goals, time available and comfort with risk", "A plan for retirement and other long-term needs"];
+var RC={"0-2":["A clear idea of your monthly income and expenses","A clear plan to pay off any existing loans","Started a small monthly savings habit","Basic health insurance in place"],"3-7":["Actively paying off loans and working towards being debt free","An emergency fund that covers 6 months of expenses","Life and health insurance in place","Started a regular monthly investment"],"8-15":["If any major loan is taken — a clear debt payoff plan is in place","An emergency fund covering 6 months of expenses","Adequate life and health insurance for your family","Regular investments across at least 2 asset classes","A clear retirement plan in place"],"15+":["Comprehensive insurance coverage for your family","A fully funded emergency reserve","A diversified investment portfolio","A retirement corpus that is fully on track","At least one source of income beyond your salary"]};
 var MD={
   "scarcity": {
     "label": "The Survivor",
@@ -1151,8 +1151,27 @@ function calcSc(){
   return {counts:counts,beliefs:beliefs,choices:choices,
     leading:topThemes(counts),beliefLeading:topThemes(beliefs),choiceLeading:topThemes(choices)};
 }
+// Keep every score internally. Use the overall pattern to narrow ties for display.
+function displayThemes(themes,overall){
+  if(themes.length<=2)return themes.slice();
+  var sorted=themes.slice().sort(function(a,b){return overall[b]-overall[a];});
+  // Do not invent a distinction where the second and third remain exactly tied.
+  return overall[sorted[1]]>overall[sorted[2]] ? sorted.slice(0,2) : [];
+}
+function answerExample(themes,belief){
+  var contexts=['what money means to you','an expensive purchase','a risky investment',
+    'why you earn money','a salary increase','a paid networking event','buying a home',
+    'a career course','someone wealthy','a major purchase'];
+  var index=QS.findIndex(function(q,i){
+    return q.isLabel===belief && q.opts[answers[i]] &&
+      (themes.length===0 || themes.indexOf(q.opts[answers[i]].m)>-1);
+  });
+  if(index<0)return '';
+  return 'When asked about '+contexts[index]+', you chose: “'+escapeHTML(QS[index].opts[answers[index]].t)+'”';
+}
 function themeNames(themes){
-  return themes.map(function(m){return MD[m].theme;}).join(' and ');
+  var names={scarcity:'protecting your money',security:'security',status:'recognition',freedom:'freedom',abundance:'growth'};
+  return themes.map(function(m){return names[m];}).join(' and ');
 }
 function narrativeParagraphs(text,css){
   return '<p class="'+css+'">'+text+'</p>';
@@ -1161,68 +1180,75 @@ function generateReport(){
   if(!goalsValid() || answers.some(function(a,i){return a===null || !QS[i].opts[a];}))return;
   var sc=calcSc();
   var fn=escapeHTML(user.name.split(' ')[0]);
-  var ri=FOUNDATIONS;
+  var ri=RC[user.exp]||RC['3-7'];
   var gl=selGoals.map(function(i){return i===GOALS.length-1 ? document.getElementById('other-goal').value.trim() : GOALS[i];});
 
   var intro='Based on your answers, here is what your money mindset may look like.';
+  var leading=displayThemes(sc.leading,sc.counts);
+  var beliefThemes=displayThemes(sc.beliefLeading,sc.counts);
+  var choiceThemes=displayThemes(sc.choiceLeading,sc.counts);
   var blend=sc.leading.length>1;
-  var title=blend ? 'A Blend of Money Mindsets' : MD[sc.leading[0]].label;
+  var title=blend ? 'A Blend of Money Mindsets' : MD[leading[0]].label;
   var mindsetHTML='<div class="section-label">Your Money Mindset</div>'
     +'<p class="section-body-light">'+intro+'</p>'
     +'<div class="mindset-label-big">'+title+'</div>';
-  if(blend){
-    mindsetHTML+=narrativeParagraphs('Your answers give equal weight to '+themeNames(sc.leading)+'. Several priorities can matter at the same time; you do not have to fit into one style.','section-body-light');
+  if(blend && leading.length===0){
+    mindsetHTML+=narrativeParagraphs('Your answers reflect a mix of money priorities, without one or two standing out clearly. You may think differently about spending, security and future opportunities. Start by looking at what matters most for your life right now.','section-body-light');
+  }else if(blend){
+    mindsetHTML+=narrativeParagraphs('Your answers give equal weight to '+themeNames(leading)+'. Several priorities can matter at the same time; you do not have to fit into one style.','section-body-light');
   }else{
-    mindsetHTML+=narrativeParagraphs('The theme you chose most often was '+themeNames(sc.leading)+'. Other priorities may also matter to you.','section-body-light');
+    mindsetHTML+=narrativeParagraphs('The theme you chose most often was '+themeNames(leading)+'. Other priorities may also matter to you.','section-body-light');
   }
-  sc.leading.forEach(function(m){
+  leading.forEach(function(m){
     if(blend)mindsetHTML+='<h3 style="color:var(--gold);margin-top:18px">'+MD[m].label+'</h3>';
     mindsetHTML+=narrativeParagraphs(MD[m].desc,'section-body-light')
       +'<div class="decisions-secondary" style="font-style:italic">'+MD[m].descBox+'</div>';
   });
-  mindsetHTML+='<p class="section-body-light" style="margin-top:20px;font-size:13px">Across your 10 answers: '
-    +MO.map(function(m){return MD[m].label+' '+sc.counts[m]+'/10';}).join(' · ')
-    +'. These counts describe the themes in your answers, not how well you manage money.</p>';
-
   var decisionsHTML='';
-  if(sc.choiceLeading.length>1){
-    decisionsHTML+=narrativeParagraphs('Your choices give equal weight to '+themeNames(sc.choiceLeading)+'. For example, you may want security when buying a home and flexibility when considering your work. Different situations can bring different needs into focus.','decisions-primary');
+  if(choiceThemes.length===0){
+    decisionsHTML=narrativeParagraphs('Your choices change with the situation, without one or two priorities standing out clearly. '+answerExample([],false),'decisions-primary');
+  }else if(choiceThemes.length===2){
+    decisionsHTML=narrativeParagraphs('Your choices point to two priorities: '+themeNames(choiceThemes)+'.','decisions-primary');
+    choiceThemes.forEach(function(m){
+      decisionsHTML+=narrativeParagraphs(answerExample([m],false),'decisions-primary');
+    });
   }else{
-    decisionsHTML+=narrativeParagraphs('In the situations we asked about, '+themeNames(sc.choiceLeading)+' came first most often.','decisions-primary');
-    decisionsHTML+=narrativeParagraphs(MD[sc.choiceLeading[0]].decisions,'decisions-primary');
+    decisionsHTML=narrativeParagraphs(MD[choiceThemes[0]].decisions,'decisions-primary');
   }
 
-  var same=sc.beliefLeading.length===sc.choiceLeading.length &&
-    sc.beliefLeading.every(function(m){return sc.choiceLeading.indexOf(m)>-1;});
+  var same=beliefThemes.length>0 && beliefThemes.length===choiceThemes.length &&
+    beliefThemes.every(function(m){return choiceThemes.indexOf(m)>-1;});
+  var overlap=beliefThemes.filter(function(m){return choiceThemes.indexOf(m)>-1;});
+  var extra=choiceThemes.filter(function(m){return beliefThemes.indexOf(m)===-1;});
   var syncLabel,stxt,sbox;
-  if(sc.beliefLeading.length>1 || sc.choiceLeading.length>1){
-    syncLabel='Several Priorities';
-    stxt='When thinking about what money means to you, '+themeNames(sc.beliefLeading)+' stood out. In the situations we asked about, '+themeNames(sc.choiceLeading)+' stood out. You may be balancing more than one priority. For example, wanting more freedom can sit alongside keeping money safe for your family.';
-    sbox='Use your goals to decide which priority needs more attention right now.';
+  if(beliefThemes.length===0 || choiceThemes.length===0){
+    syncLabel='A Mixed Pattern';
+    stxt='Your answers do not point to just one or two priorities across these questions. '+answerExample(beliefThemes,true)+' '+answerExample(choiceThemes,false);
+    sbox='Look at these choices alongside your goals to decide what needs attention now.';
   }else if(same){
-    syncLabel='A Similar Priority';
-    var matchExample={
-      scarcity:'A worry about money running out may go alongside keeping extra salary safe.',
-      security:'A wish for security may go alongside choosing a home within your budget.',
-      status:'A wish for recognition may go alongside choosing a course that helps you stand out.',
-      freedom:'A wish to live on your own terms may go alongside building income beyond your job.',
-      abundance:'A wish to grow wealth may go alongside investing more of a salary increase.'
-    };
-    stxt='What you want from money and the choices you selected point towards '+themeNames(sc.beliefLeading)+'. '+matchExample[sc.beliefLeading[0]]+' Your answers show a similar priority across these questions.';
-    sbox='A practical plan can help you turn that priority into everyday steps.';
+    syncLabel='In Sync';
+    stxt='What you want from money and the choices you selected both point towards '+themeNames(beliefThemes)+'. '+answerExample(beliefThemes,true)+' '+answerExample(choiceThemes,false);
+    sbox='The next step is turning this clarity into a plan that works for your life.';
+  }else if(overlap.length>0 && extra.length>0){
+    syncLabel='An Additional Priority';
+    stxt='Your view of money centres on '+themeNames(beliefThemes)+'. Your choices reflect this, while also giving importance to '+themeNames(extra)+'. '+answerExample(extra,false);
+    sbox='This does not mean your thoughts and choices conflict. Your plan can make room for both.';
   }else{
     syncLabel='Different Priorities';
-    stxt='When thinking about money, '+themeNames(sc.beliefLeading)+' stood out. In the situations we asked about, '+themeNames(sc.choiceLeading)+' came first more often. For example, you may value growing wealth while choosing to protect savings when an investment feels risky. Your responsibilities, available money and the situation can all affect a choice.';
-    sbox='A difference does not mean something is wrong. Consider how your choices support what matters to you now and in the future.';
+    stxt='What you want from money points towards '+themeNames(beliefThemes)+'. In the situations we asked about, your choices point towards '+themeNames(choiceThemes)+'. '+answerExample(beliefThemes,true)+' '+answerExample(choiceThemes,false);
+    sbox='Consider whether these choices fit your current needs and longer-term goals. A difference alone does not mean something is wrong.';
   }
   var thoughtsHTML='<div class="sync-badge '+(same?'in-sync':'gap')+'">'+syncLabel+'</div>'
     +narrativeParagraphs(stxt,'section-body')
     +'<div class="decisions-secondary" style="font-style:italic">'+sbox+'</div>';
-  var strengthsHTML=sc.leading.map(function(m){
+  var strengthsHTML=leading.map(function(m){
     return (blend?'<h3 style="margin-top:16px">'+MD[m].label+'</h3>':'')
       +'<p class="section-body"><strong>What may help you:</strong> '+MD[m].strength+'</p>'
       +'<p class="section-body"><strong>What to watch for:</strong> '+MD[m].blind+'</p>';
   }).join('');
+  if(!leading.length){
+    strengthsHTML=narrativeParagraphs('You may be able to see more than one side of a money decision. What needs attention is whether your choices, taken together, support your goals. A simple spending and saving plan can help you check this.','section-body');
+  }
 
   var waIcon='<svg class="wa-svg" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
 
@@ -1238,7 +1264,7 @@ function generateReport(){
     +'<div class="report-section report-section-hero fade-in">'+mindsetHTML+'</div>'
 
     +'<div class="report-section fade-in">'
-    +'<div class="section-label">What Guides Your Money Choices</div>'
+    +'<div class="section-label">Your Financial Decisions</div>'
     +'<div class="section-divider"></div>'
     +decisionsHTML
     +'</div>'
@@ -1262,9 +1288,9 @@ function generateReport(){
     +'</ul></div></div>'
 
     +'<div class="report-section fade-in">'
-    +'<div class="section-label">Your Financial Foundations</div>'
+    +'<div class="section-label">Your Financial Reality Check</div>'
     +'<div class="section-divider"></div>'
-    +'<p class="section-body" style="margin-bottom:8px">Your answers do not tell us which of these are already in place. Use this checklist to review what you have and what needs attention:</p>'
+    +'<p class="section-body" style="margin-bottom:8px">With '+escapeHTML(user.exp)+' years of work experience, these are key areas you should have checked:</p>'
     +'<div class="goals-box"><ul class="goal-list">'+ri.map(function(item){return '<li style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid #E0D8CC"><span style="width:26px;height:26px;min-width:26px;border-radius:6px;background:#1A4A30;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;font-family:DM Sans,sans-serif">&#10003;</span><span style="font-size:14px;color:#1A1612">'+item+'</span></li>';}).join('')+'</ul></div>'
     +'<div class="reality-note">Start with the areas that matter most for your current situation. You do not have to build everything at once.</div>'
     +'</div>'
