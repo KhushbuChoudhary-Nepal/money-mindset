@@ -610,12 +610,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
 .report-section-hero .section-body-light { color:rgba(255,255,255,.95); }
 .decisions-secondary,.goals-box,.checklist-box,.disclaimer { background:#FFFFFF; }
 .goals-box,.checklist-box,.disclaimer { border:1px solid #DFE7F0; }
-.about-section { background:#EDF4FB; border:1px solid #DCE7F3; }
+.about-section { background:#13264A; border:1px solid #13264A; }
 .about-section::before { display:none; }
-.about-name { color:#172B4D; }
-.about-greeting,.about-role { color:#536D89; }
-.about-body { color:#24456C; }
-.about-section #pdf-status { color:#24456C; }
+.about-name { color:#FFD700; }
+.about-greeting,.about-role { color:#C1CFE1; }
+.about-body { color:#FFFFFF; }
+.about-section #pdf-status { color:#FFFFFF; }
 .jugnu-banner,.jugnu-footer { background:#13264A; border-radius:0; }
 .jugnu-footer b { color:#FFFFFF; font-size:20px; font-weight:700; }
 .pdf-export .report-section { border:1px solid #DFE7F0; }
@@ -623,13 +623,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
 @media print {
  #screen-report { background:#FFFFFF!important; }
  .report-section-hero { background:#2B5D85!important; }
- .about-section { background:#EDF4FB!important; color:#24456C!important; border:1px solid #DCE7F3!important; }
- .about-name { color:#172B4D!important; }
- .about-greeting,.about-role { color:#536D89!important; }
- .about-body { color:#24456C!important; }
+ .about-section { background:#13264A!important; color:#FFFFFF!important; border:1px solid #13264A!important; }
+ .about-name { color:#FFD700!important; }
+ .about-greeting,.about-role { color:#C1CFE1!important; }
+ .about-body { color:#FFFFFF!important; }
  .decisions-secondary,.goals-box,.checklist-box,.disclaimer { background:#FFFFFF!important; }
  .jugnu-banner,.jugnu-footer { background:#13264A!important; }
 }
+
+
+/* A4 exports keep the same About layout on phones and computers. */
+.pdf-export .about-inner { flex-direction:row; flex-wrap:nowrap; gap:22px; }
+.pdf-export .about-text-block { flex:1; width:auto; min-width:0; }
+.pdf-export .about-photo { order:2; align-self:flex-start; }
+.pdf-export .cta-btns { flex-direction:row; }
+.pdf-export .jugnu-banner { grid-template-columns:96px minmax(0,1fr) 142px; gap:16px; }
+.pdf-export .jugnu-logo { width:96px; height:57px; }
+.pdf-export .jugnu-planner { grid-column:auto; text-align:right; border-top:none; padding-top:0; }
+.pdf-export .jugnu-planner span { display:block; margin-right:0; }
 
 </style>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" onload="resolvePDFLibrary(true)" onerror="resolvePDFLibrary(false)"></script>
