@@ -602,6 +602,35 @@ body { font-family: 'DM Sans', sans-serif; background: var(--green-dark); color:
  .jugnu-banner .report-title { color:white!important; }
 }
 
+
+/* Distinct Jugnu banners, blue feature cards and a clean white report. */
+#screen-report { background:#FFFFFF; }
+#report-out .report-section { border:1px solid #DFE7F0; box-shadow:none; }
+#report-out .report-section-hero { background:#2B5D85; border-color:#2B5D85; }
+.report-section-hero .section-body-light { color:rgba(255,255,255,.95); }
+.decisions-secondary,.goals-box,.checklist-box,.disclaimer { background:#FFFFFF; }
+.goals-box,.checklist-box,.disclaimer { border:1px solid #DFE7F0; }
+.about-section { background:#EDF4FB; border:1px solid #DCE7F3; }
+.about-section::before { display:none; }
+.about-name { color:#172B4D; }
+.about-greeting,.about-role { color:#536D89; }
+.about-body { color:#24456C; }
+.about-section #pdf-status { color:#24456C; }
+.jugnu-banner,.jugnu-footer { background:#13264A; border-radius:0; }
+.jugnu-footer b { color:#FFFFFF; font-size:20px; font-weight:700; }
+.pdf-export .report-section { border:1px solid #DFE7F0; }
+.pdf-export .report-section-hero { background:#2B5D85; border-color:#2B5D85; }
+@media print {
+ #screen-report { background:#FFFFFF!important; }
+ .report-section-hero { background:#2B5D85!important; }
+ .about-section { background:#EDF4FB!important; color:#24456C!important; border:1px solid #DCE7F3!important; }
+ .about-name { color:#172B4D!important; }
+ .about-greeting,.about-role { color:#536D89!important; }
+ .about-body { color:#24456C!important; }
+ .decisions-secondary,.goals-box,.checklist-box,.disclaimer { background:#FFFFFF!important; }
+ .jugnu-banner,.jugnu-footer { background:#13264A!important; }
+}
+
 </style>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" onload="resolvePDFLibrary(true)" onerror="resolvePDFLibrary(false)"></script>
 </head>
@@ -1396,7 +1425,7 @@ function generateReport(){
   out.innerHTML =
     '<div class="report-header jugnu-banner fade-in">'
     +'<img class="jugnu-logo" src="'+JUGNU_LOGO+'" width="96" height="57" alt="Jugnu — See Beyond">'
-    +'<div class="jugnu-heading"><h1 class="report-title">Your Money Mindset Report</h1>'
+    +'<div class="jugnu-heading"><h1 class="report-title">Money Mindset Report</h1>'
     +'<div class="jugnu-prepared">Prepared for <strong>'+escapeHTML(user.name)+'</strong></div></div>'
     +'<div class="jugnu-planner"><span>Planner</span><strong>Khushbu Choudhary</strong></div>'
     +'</div>'
@@ -1453,7 +1482,7 @@ function generateReport(){
     +'</div>'
     +'</div>'
     +'<div class="disclaimer fade-in"><strong style="display:block;font-size:13px;font-weight:700;color:#4A4A5A;margin-bottom:8px;letter-spacing:0.05em;text-transform:uppercase">Disclaimer</strong>This report has been independently designed by Khushbu Choudhary solely for the purpose of creating financial awareness among Nepalese professionals. This short assessment is a reflection tool, not a validated psychological test. It describes the priorities in your answers and does not assess your financial health or actual behaviour. It is for educational purposes and is not personalised financial advice. For a financial plan tailored to your specific situation, please reach out to Khushbu directly.</div>'
-    +'<div class="jugnu-footer"><strong>jugnu</strong><span>— SEE BEYOND</span></div>'
+    +'<div class="jugnu-footer"><strong>jugnu</strong><b aria-hidden="true">—</b><span>SEE BEYOND</span></div>'
     +'<button onclick="shareAssessment()" class="btn-share-friend">&#128101; Help a friend understand their money mindset</button>';
 
   // Set photo
@@ -1502,12 +1531,12 @@ async function saveReportPDF() {
       return img.decode ? img.decode().catch(function(){}) : Promise.resolve();
     }));
     wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:absolute;left:0;top:0;width:733px;z-index:-1;pointer-events:none;background:#F5F0E8;';
+    wrapper.style.cssText = 'position:absolute;left:0;top:0;width:733px;z-index:-1;pointer-events:none;background:#FFFFFF;';
     var clone = source.cloneNode(true);
     clone.removeAttribute('id');
     clone.classList.add('pdf-export');
     clone.querySelectorAll('[id]').forEach(function(el){ el.removeAttribute('id'); });
-    clone.style.cssText = 'width:100%;max-width:none;margin:0;box-sizing:border-box;padding:24px;background:#F5F0E8;';
+    clone.style.cssText = 'width:100%;max-width:none;margin:0;box-sizing:border-box;padding:24px;background:#FFFFFF;';
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
     var filename = (user.name || 'Your').replace(/[^a-zA-Z0-9_-]+/g,'_') + '_Money_Mindset_Report.pdf';
